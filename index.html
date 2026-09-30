@@ -1,0 +1,1668 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Schedule Compass</title>
+<meta name="description" content="A weekly planner for college students that builds every day around classes, credits, work shifts and sleep.">
+<meta name="theme-color" content="#2B4570">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Jost:wght@400;500;600&family=Parisienne&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Figtree:wght@400;500;600&family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<style>
+/* ---------- looks ---------- */
+:root{
+  --accent:#B04A72; --accent-deep:#8E3B5A; --soft:#FDEEF2; --line:#F1C9D6;
+  --paper:#FFF7F4; --card:#FFFFFF; --ink:#4A2E3A; --muted:#8A5A6C; --dot:#F6D9E2;
+  --name-font:'Parisienne','Snell Roundhand','Brush Script MT',cursive; --name-size:74px; --name-style:normal; --name-weight:400; --name-case:none;
+  --display:'Cormorant Garamond',Georgia,serif; --display-style:italic; --display-weight:600; --display-case:none; --display-track:0;
+  --sans:'Jost','Avenir Next','Segoe UI',system-ui,sans-serif;
+  --day-radius:80px 80px 18px 18px; --radius:22px; --blk-radius:10px; --pill:999px;
+  --class-bg:#F7CFDC; --class-fg:#7A2A4A; --work-bg:#FCE1CF; --work-fg:#7A3F1E; --study-bg:#D9EEE2; --study-fg:#2F5E45;
+  --fun-bg:#FBEBB5; --fun-fg:#6B5410; --appt-bg:#DCEBFA; --appt-fg:#27496D; --routine-bg:#EDE4F7; --routine-fg:#4E3D70;
+  --meal-bg:#FFFFFF; --meal-fg:#6B4A55; --meal-line:#E7B8C6;
+}
+[data-look="sage"]{
+  --paper:#F3F5F1; --ink:#2F352C; --muted:#5F6858; --dot:transparent;
+  --name-font:'Fraunces',Georgia,serif; --name-size:58px; --name-weight:600;
+  --display:'Fraunces',Georgia,serif; --display-style:normal; --display-weight:600;
+  --sans:'Figtree','Segoe UI',system-ui,sans-serif;
+  --day-radius:22px; --radius:18px; --blk-radius:8px;
+  --class-bg:#E3E8D8; --class-fg:#3F4A2C; --work-bg:#EFE3D3; --work-fg:#6A4A2A; --study-bg:#D8E6E4; --study-fg:#2C5352;
+  --fun-bg:#F1E8C8; --fun-fg:#5E5020; --appt-bg:#DDE5EE; --appt-fg:#2E4660; --routine-bg:#E6E3EC; --routine-fg:#46405A;
+  --meal-bg:#FFFFFF; --meal-fg:#4F5448; --meal-line:#C9CFBF;
+}
+[data-look="slate"]{
+  --paper:#EDF0F3; --ink:#1F262E; --muted:#56616D; --dot:transparent;
+  --name-font:'Barlow Condensed','Arial Narrow',sans-serif; --name-size:64px; --name-weight:700; --name-case:uppercase;
+  --display:'Barlow Condensed','Arial Narrow',sans-serif; --display-style:normal; --display-weight:700; --display-case:uppercase; --display-track:.04em;
+  --sans:'Barlow','Segoe UI',system-ui,sans-serif;
+  --day-radius:6px; --radius:8px; --blk-radius:4px; --pill:8px;
+  --class-bg:#D6E0EE; --class-fg:#1F3A5F; --work-bg:#E8DCCB; --work-fg:#5A3E1E; --study-bg:#D5E8DF; --study-fg:#1F4D3A;
+  --fun-bg:#E9E1C4; --fun-fg:#4F4516; --appt-bg:#E0DDEE; --appt-fg:#3A3566; --routine-bg:#DDE3E9; --routine-fg:#2E3A46;
+  --meal-bg:#FFFFFF; --meal-fg:#3A4550; --meal-line:#B9C3CD;
+}
+.only-bloom,.only-sage,.only-slate{display:none}
+[data-look="bloom"] .only-bloom,[data-look="sage"] .only-sage,[data-look="slate"] .only-slate{display:inline-block}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-text-size-adjust:100%}
+body{background:radial-gradient(circle at 12px 12px,var(--dot) 1.4px,transparent 1.6px) 0 0/28px 28px,var(--paper)}
+button,input,select,textarea{font:inherit;color:inherit}
+.wrap{max-width:1320px;margin:0 auto;padding:28px 20px 60px}
+.display{font-family:var(--display);font-style:var(--display-style);font-weight:var(--display-weight);text-transform:var(--display-case);letter-spacing:var(--display-track)}
+
+/* header */
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px}
+.brand h1{margin:0;line-height:1;font-size:30px;color:var(--accent-deep)}
+.brand h1 .name{font-family:var(--name-font);font-style:var(--name-style);font-weight:var(--name-weight);text-transform:var(--name-case);font-size:var(--name-size);color:var(--accent);margin-right:6px;vertical-align:-6px;letter-spacing:0}
+.kicker{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+.ornament{width:64px;height:64px;flex:none}
+
+.hero{margin:20px 0 22px;background:var(--card);border:1.5px solid var(--line);border-radius:calc(var(--radius) + 6px);padding:22px 28px;display:flex;gap:22px;align-items:center;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;background:var(--soft)}
+[data-look="slate"] .hero::after{border-radius:0;transform:rotate(20deg)}
+.hero .icon{width:46px;height:46px;flex:none;position:relative;z-index:1;color:var(--accent)}
+.hero .txt{position:relative;z-index:1}
+.hero .hi{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.hero .aff{font-size:clamp(22px,3vw,32px);color:var(--accent-deep);line-height:1.2;margin-top:4px;text-wrap:balance}
+[data-look="slate"] .hero .aff{text-transform:none;letter-spacing:0}
+
+/* tabs & buttons */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.tab,.btn{border:1.5px solid var(--line);background:var(--card);padding:9px 18px;border-radius:var(--pill);cursor:pointer;font-weight:500;color:var(--accent-deep);min-height:44px}
+.tab[aria-selected="true"],.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn:hover{background:var(--soft)}.btn.primary:hover{background:var(--accent-deep)}
+:focus-visible{outline:3px solid var(--line);outline-offset:2px}
+.icon-btn{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);background:var(--card);cursor:pointer;display:inline-grid;place-items:center;color:var(--accent-deep)}
+[data-look="slate"] .icon-btn{border-radius:8px}
+.panel{display:none}.panel.on{display:block}
+.bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.bar .range{font-size:26px;color:var(--accent-deep);margin:0 6px;min-width:220px;text-align:center}
+.spacer{flex:1}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0 0 16px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:14px;height:14px;border-radius:5px;display:inline-block}
+.banner{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--soft);border:1.5px dashed var(--line);border-radius:var(--radius);padding:14px 18px;margin-bottom:16px;color:var(--accent-deep)}
+.banner p{margin:0;flex:1;min-width:220px}
+
+/* week */
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px}
+.day{background:var(--card);border:1.5px solid var(--line);border-radius:var(--day-radius);padding:18px 9px 10px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.day.today{border-color:var(--accent);box-shadow:0 0 0 3px var(--line)}
+.day h3{margin:0;text-align:center;font-size:23px;color:var(--accent-deep);line-height:1}
+[data-look="slate"] .day h3{font-size:21px}
+.day .date{text-align:center;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.day .today-tag{align-self:center;font-size:11px;letter-spacing:.14em;text-transform:uppercase;background:var(--accent);color:#fff;border-radius:var(--pill);padding:2px 9px}
+.day .aff{background:var(--soft);border-radius:calc(var(--blk-radius) + 2px);padding:8px;font-family:var(--display);font-style:var(--display-style);font-weight:600;font-size:15px;line-height:1.2;color:var(--accent-deep);text-align:center;text-wrap:balance}
+[data-look="slate"] .day .aff{font-family:var(--sans);font-weight:500;font-size:13.5px}
+.day .aff svg{display:block;margin:0 auto 3px;color:var(--accent)}
+.blk{border-radius:var(--blk-radius);padding:5px 8px;line-height:1.2;border:1.5px solid transparent}
+.blk .t{font-size:12px;font-weight:600}
+.blk .l{font-size:13px}
+.blk .n{font-size:12px;font-style:italic;margin-top:2px}
+.blk.conflict{border:1.5px dashed #B3261E!important}
+.blk.conflict .n{color:#B3261E;font-style:normal;font-weight:600}
+.c-class{background:var(--class-bg);color:var(--class-fg)} .c-work{background:var(--work-bg);color:var(--work-fg)}
+.c-study{background:var(--study-bg);color:var(--study-fg)} .c-fun{background:var(--fun-bg);color:var(--fun-fg)}
+.c-appt{background:var(--appt-bg);color:var(--appt-fg)} .c-routine{background:var(--routine-bg);color:var(--routine-fg)}
+.c-meal{background:var(--meal-bg);color:var(--meal-fg);border:1.5px dashed var(--meal-line)}
+.dhead,.dblocks,.dnotes{display:flex;flex-direction:column;gap:6px}
+.daysum{margin-top:auto;padding-top:4px;text-align:center;font-size:12px;color:var(--muted)}
+.dnotes img{display:block;width:100%;border:1.5px solid var(--line);border-radius:var(--blk-radius);background:#fff repeating-linear-gradient(to bottom,transparent 0 17px,var(--line) 17px 18px)}
+.dnotes .lines{display:none}
+.notebtn{display:flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:6px;border:1.5px dashed var(--line);border-radius:var(--blk-radius);background:transparent;color:var(--accent-deep);font-size:12.5px;font-weight:500;cursor:pointer}
+.notebtn:hover{background:var(--soft)}
+/* print options */
+.printpanel{margin-bottom:16px;display:flex;flex-direction:column;gap:12px}
+.orients{display:flex;gap:10px;flex-wrap:wrap}
+.orient{position:relative}
+.orient input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.orient span{display:flex;align-items:center;gap:10px;border:2px solid var(--line);border-radius:12px;padding:10px 14px;cursor:pointer;min-height:56px;font-weight:500;color:var(--accent-deep)}
+.orient input:checked+span{border-color:var(--accent);background:var(--soft)}
+.orient input:focus-visible+span{outline:3px solid var(--accent)}
+.checks{display:flex;flex-direction:column;gap:8px}
+.checks label{display:flex;gap:10px;align-items:center;font-size:14px;min-height:32px;cursor:pointer}
+.checks input{width:20px;height:20px;accent-color:var(--accent)}
+/* handwriting pad */
+.notepad{position:fixed;inset:0;z-index:60;background:rgba(25,20,24,.5);display:grid;place-items:center;padding:16px;overflow:auto}
+.nbox{background:var(--card);border-radius:var(--radius);padding:16px;width:min(780px,100%);display:flex;flex-direction:column;gap:10px}
+.nhead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.nhead h2{margin:0;font-size:24px;color:var(--accent-deep)}
+.ntools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tool{min-height:40px;min-width:40px;padding:6px 12px;border:1.5px solid var(--line);border-radius:var(--pill);background:var(--card);cursor:pointer;font-size:13px;font-weight:500;color:var(--ink)}
+.tool[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.pen{width:40px;padding:0;display:inline-grid;place-items:center}
+.pen i{width:18px;height:18px;border-radius:50%;display:block}
+.pen[aria-pressed="true"]{background:var(--soft);border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.tsep{width:1px;height:28px;background:var(--line)}
+#npCanvas{display:block;width:100%;height:auto;aspect-ratio:4/3;touch-action:none;border:1.5px solid var(--line);border-radius:12px;cursor:crosshair;
+  background:#fff repeating-linear-gradient(to bottom,transparent 0 35px,var(--line) 35px 36px)}
+.nfoot{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.notespage{display:none}
+.daysum svg{vertical-align:-2px;color:var(--accent)}
+
+/* forms */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;align-items:start}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:var(--radius);padding:20px 22px}
+.card h2{margin:0 0 4px;font-size:26px;color:var(--accent-deep)}
+.hint{margin:0 0 12px;color:var(--muted);font-size:14px;line-height:1.45}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);font-weight:500}
+input[type=text],input[type=time],input[type=date],input[type=number],select,textarea{border:1.5px solid var(--line);border-radius:calc(var(--blk-radius) + 2px);padding:9px 11px;background:var(--card);min-height:44px;width:100%}
+textarea{min-height:170px;resize:vertical;line-height:1.5}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-color:var(--accent)}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:10px}
+.msg{margin-top:10px;font-size:14px;color:var(--accent-deep);min-height:20px}
+.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.list li{display:flex;align-items:center;gap:10px;border-radius:calc(var(--blk-radius) + 2px);padding:6px 6px 6px 12px;font-size:14px}
+.list li .grow{flex:1}
+.x{width:36px;height:36px;border-radius:50%;border:none;background:rgba(255,255,255,.7);cursor:pointer;color:inherit;font-size:18px;line-height:1}
+.dow{display:flex;gap:4px;flex-wrap:wrap}
+.dow label{position:relative}
+.dow input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.dow span{display:inline-grid;place-items:center;min-width:44px;height:36px;border-radius:calc(var(--blk-radius) + 2px);border:1.5px solid var(--line);font-size:13px;cursor:pointer}
+.dow input:checked+span{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.dow input:focus-visible+span{outline:3px solid var(--line)}
+.classrow{border:1.5px solid var(--line);border-radius:var(--radius);padding:12px;margin-bottom:10px}
+.foot{margin-top:28px;text-align:center;font-size:18px;color:var(--muted)}
+
+/* look pickers (shared by welcome + settings) */
+.looks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.lookopt{position:relative}
+.lookopt input,.swatch input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.lookcard{display:flex;flex-direction:column;gap:6px;border:2px solid var(--line);border-radius:14px;padding:12px;background:#fff;cursor:pointer;height:100%}
+.lookopt input:checked+.lookcard{border-color:var(--accent);box-shadow:0 0 0 3px var(--line)}
+.lookopt input:focus-visible+.lookcard{outline:3px solid var(--accent)}
+.lookcard .nm{font-size:30px;line-height:1.05;color:#3a2a33}
+.lookcard .chips{display:flex;gap:4px}.lookcard .chips i{width:18px;height:12px;border-radius:3px}
+.lookcard b{font-size:14px;color:#2c2c2c}.lookcard small{font-size:12px;color:#5f5f5f}
+.swatches{display:flex;flex-wrap:wrap;gap:10px}
+.swatch{position:relative}
+.swatch span{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1.5px var(--line);cursor:pointer}
+.swatch input:checked+span{box-shadow:0 0 0 3px var(--ink)}
+.swatch input:checked+span::after{content:"";width:12px;height:12px;border-radius:50%;background:#fff}
+.swatch input:focus-visible+span{outline:3px solid var(--accent);outline-offset:3px}
+
+/* welcome */
+.welcome{position:fixed;inset:0;z-index:50;background:var(--paper);overflow-y:auto;padding:24px 16px}
+.welcome[hidden]{display:none}
+.welcome .inner{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.welcome h2{margin:0;font-size:40px;color:var(--accent-deep);line-height:1.1}
+.welcome h2 .name{font-family:var(--name-font);font-weight:var(--name-weight);text-transform:var(--name-case);color:var(--accent);font-style:normal}
+.welcome .step{background:var(--card);border:1.5px solid var(--line);border-radius:var(--radius);padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.welcome .step h3{margin:0;font-size:22px;color:var(--accent-deep)}
+.welcome .step h3 span{font-family:var(--sans);font-style:normal;font-weight:600;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:2px}
+
+/* chips, study bar, school dates */
+.daychips{display:flex;flex-direction:column;gap:4px}
+.chip{border-radius:var(--blk-radius);padding:4px 7px;font-size:12px;font-weight:600;line-height:1.2;display:flex;gap:5px;align-items:flex-start}
+.chip svg{flex:none;margin-top:1px}
+.chip.off{background:var(--soft);color:var(--accent-deep);border:1.5px solid var(--line)}
+.chip.deadline{background:#FDEBC8;color:#6B4300}
+.chip.event{background:var(--routine-bg);color:var(--routine-fg)}
+.studybar{background:var(--card);border:1.5px solid var(--line);border-radius:var(--radius);padding:12px 16px;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center}
+.studybar .meter{flex:1;min-width:160px;height:10px;border-radius:999px;background:var(--soft);overflow:hidden}
+.studybar .meter i{display:block;height:100%;background:var(--accent);border-radius:999px}
+.studybar .lbl{font-weight:600;color:var(--accent-deep)}
+.studybar .sub{font-size:13px;color:var(--muted)}
+.coming{margin-top:8px;font-size:14px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 16px}
+.coming b{color:#6B4300;font-weight:600}
+.review{width:100%;border-collapse:collapse;font-size:14px}
+.review th{text-align:left;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:6px;border-bottom:1.5px solid var(--line)}
+.review td{padding:6px;border-bottom:1px solid var(--line);vertical-align:middle}
+.review input[type=text],.review select,.review input[type=date]{min-height:38px;padding:6px 8px}
+.review input[type=checkbox]{width:20px;height:20px}
+.tablewrap{overflow-x:auto}
+.progress{height:8px;border-radius:999px;background:var(--soft);overflow:hidden;margin-top:8px}
+.progress i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.dlist li{background:var(--card);border:1.5px solid var(--line)}
+.dlist .links{display:flex;gap:6px;flex-wrap:wrap;font-size:12px}
+.dlist .links a{color:var(--accent-deep)}
+.credits{max-width:110px}
+@media (prefers-reduced-motion:reduce){.progress i{transition:none}}
+@media (max-width:1100px){.week{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:720px){
+  .week{grid-template-columns:1fr}
+  [data-look="bloom"] .day{border-radius:40px 40px 18px 18px}
+  .brand h1 .name{font-size:calc(var(--name-size) * .8)}
+  .bar .range{min-width:0;font-size:22px;flex-basis:100%;order:-1;text-align:left;margin:0}
+  .hero{padding:18px}
+  .looks{grid-template-columns:1fr}
+}
+.print-only{display:none}
+@media print{
+  @page{size:letter landscape;margin:0.35in}
+  html,body{background:#fff!important}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .wrap{max-width:none;padding:0}
+  .hero,.tabs,.bar,.no-print,.banner,.studybar,#add,#routine,#school,.foot,.top,.welcome{display:none!important}
+  #week{display:block!important}
+  .print-only{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:8px}
+  .week{grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+  .day{padding:12px 5px 6px;gap:4px;break-inside:avoid;box-shadow:none!important}
+  [data-look="bloom"] .day{border-radius:60px 60px 12px 12px}
+  .day .today-tag{display:none}
+  .day h3{font-size:18px}.day .aff{font-size:12px;padding:5px}
+  .blk{padding:3px 5px}.blk .t{font-size:9.5px}.blk .l{font-size:10.5px}.blk .n{font-size:9.5px}
+  .daysum{font-size:9.5px}.legend{margin:0 0 8px;font-size:10px}
+  .printpanel,.notebtn,.notepad{display:none!important}
+  .dhead,.dblocks{gap:4px}
+  body.p-compact .blk.c-meal{display:none}
+  body:not(.p-ink) .dnotes img{display:none}
+  .dnotes img{border:none;background:none;max-height:120px;object-fit:contain}
+  body.p-lines .dnotes .lines{display:block;flex:1 1 auto;min-height:64px;border-top:1px solid #bbb;
+    background:linear-gradient(to bottom,transparent 17px,#bdbdbd 17px) 0 0 / 100% 18px repeat}
+  body:not(.p-portrait) .day{display:flex;flex-direction:column}
+  body:not(.p-portrait) .dnotes{flex:1 1 auto;display:flex;flex-direction:column}
+  body.p-lines:not(.p-portrait) .daysum{margin-top:0}
+  /* vertical (portrait): one row per day */
+  body.p-portrait .week{grid-template-columns:1fr;gap:5px}
+  body.p-portrait .day{display:grid;grid-template-columns:118px minmax(0,1fr) 180px;grid-template-rows:auto auto;gap:3px 10px;padding:6px 8px;border-radius:10px!important;align-items:start}
+  body.p-portrait.p-nonotes .day{grid-template-columns:118px minmax(0,1fr)}
+  body.p-portrait.p-nonotes .dnotes{display:none}
+  body.p-portrait .dhead{grid-column:1;grid-row:1 / span 2;gap:3px}
+  body.p-portrait .day h3,body.p-portrait .day .date{text-align:left}
+  body.p-portrait .day h3{font-size:16px}
+  body.p-portrait .day .aff{font-size:9.5px;padding:4px 5px;text-align:left}
+  body.p-portrait .day .aff svg{display:none}
+  body.p-portrait .chip{font-size:8.5px;padding:2px 4px}
+  body.p-portrait .dblocks{grid-column:2;grid-row:1;flex-direction:row;flex-wrap:wrap;gap:3px}
+  body.p-portrait .dblocks .blk{width:calc(33.333% - 2px)}
+  body.p-portrait .daysum{grid-column:2;grid-row:2;text-align:left;margin:0;padding:0}
+  body.p-portrait .dnotes{grid-column:3;grid-row:1 / span 2;align-self:stretch;display:flex;flex-direction:column}
+  body.p-portrait .dnotes .lines{min-height:0}
+  body.p-portrait .dnotes img{max-height:70px}
+  /* full notes page */
+  body.p-page .notespage{display:block;break-before:page;page-break-before:always}
+  .notespage h2{margin:0 0 10px;font-size:22px;color:var(--accent-deep)}
+  .notesgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .nbx{border:1.5px solid var(--line);border-radius:10px;padding:6px 8px;display:flex;flex-direction:column;gap:4px;break-inside:avoid}
+  .nbx b{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .nbx .ln{height:132px;background:linear-gradient(to bottom,transparent 21px,#bdbdbd 21px) 0 0 / 100% 22px repeat;position:relative}
+  .nbx .ln img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+  body.p-portrait .nbx .ln{height:190px}
+}
+</style>
+</head>
+<body>
+
+<!-- first-launch setup -->
+<div class="welcome" id="welcome" role="dialog" aria-modal="true" aria-labelledby="wTitle" hidden>
+  <div class="inner">
+    <div>
+      <p class="kicker">Schedule Compass · setup</p>
+      <h2 class="display" id="wTitle">Let's build <span class="name" id="wName">your</span> planner</h2>
+      <p class="hint" style="margin-top:8px">A few quick choices. You can change any of them later under “My courses, routine &amp; look.”</p>
+    </div>
+    <div class="step">
+      <h3 class="display"><span>Step 1</span>What's your name?</h3>
+      <input type="text" id="wNameInput" placeholder="First name" autocomplete="given-name" aria-label="Your first name">
+    </div>
+    <div class="step">
+      <h3 class="display"><span>Step 2</span>Pick your look</h3>
+      <div class="looks" id="wLooks"></div>
+    </div>
+    <div class="step">
+      <h3 class="display"><span>Step 3</span>Pick your color</h3>
+      <div class="swatches" id="wSwatches" role="radiogroup" aria-label="Theme color"></div>
+    </div>
+    <div class="step">
+      <h3 class="display"><span>Step 4</span>Your mornings &amp; nights</h3>
+      <div class="row">
+        <label class="f">I usually wake up at<input type="time" id="wWake" value="07:00"></label>
+        <label class="f">Getting ready takes (min)<input type="number" id="wReady" value="60" min="15" max="180" step="15"></label>
+      </div>
+      <div class="row" style="margin-bottom:0">
+        <label class="f">Bedtime, at the latest<input type="time" id="wBed" value="22:30"></label>
+        <label class="f">Sleep goal (hours)<input type="number" id="wSleep" value="8" min="6" max="11" step="0.5"></label>
+      </div>
+    </div>
+    <div class="step">
+      <h3 class="display"><span>Step 5</span>Your courses this term</h3>
+      <p class="hint" style="margin:0">Add each course and its credits. Study time is planned from your credits: about 2 hours a week per credit (you can change that later). Online class with no set time? Leave the days blank.</p>
+      <div id="wClassList"></div>
+      <button class="btn" id="wAddClass" style="align-self:flex-start">+ Add a course</button>
+    </div>
+    <div class="step">
+      <h3 class="display"><span>Step 6 · optional</span>Your school calendar</h3>
+      <p class="hint" style="margin:0">Snap a photo of your school's academic calendar and your planner will mark days off, registration deadlines and term dates. You can do this now or later.</p>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn primary" id="wGo" style="padding:12px 28px;font-size:17px">Build my planner</button>
+      <button class="btn" id="wGoSchool" style="padding:12px 22px;font-size:17px">Build it &amp; add my school calendar</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg class="ornament only-bloom" viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M32 60 C32 44 30 30 22 18" fill="none" stroke="#9BB8A2" stroke-width="2" stroke-linecap="round"/>
+        <path d="M31 44 C24 42 18 38 16 32 C23 32 29 36 31 44Z" fill="#CFE3D5"/><path d="M32 36 C38 33 43 28 44 22 C38 23 33 28 32 36Z" fill="#CFE3D5"/>
+        <g transform="translate(22 16)" fill="var(--line)"><circle r="5" cx="0" cy="-6"/><circle r="5" cx="6" cy="0"/><circle r="5" cx="0" cy="6"/><circle r="5" cx="-6" cy="0"/><circle r="3.4" fill="var(--accent)"/></g>
+        <path d="M50 8 L51.5 13 L56 14.5 L51.5 16 L50 21 L48.5 16 L44 14.5 L48.5 13Z" fill="var(--accent)" opacity=".55"/>
+      </svg>
+      <svg class="ornament only-sage" viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round">
+        <path d="M32 58 V20"/><path d="M32 46 C22 46 16 40 15 30 C25 30 31 36 32 46Z" fill="var(--soft)"/><path d="M32 34 C42 34 48 28 49 18 C39 18 33 24 32 34Z" fill="var(--soft)"/><path d="M32 22 C27 18 26 12 28 6 C33 10 34 16 32 22Z" fill="var(--soft)"/>
+      </svg>
+      <svg class="ornament only-slate" viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linejoin="round">
+        <path d="M6 52 L24 24 L34 38 L42 28 L58 52Z" fill="var(--soft)"/><path d="M24 24 L28 30 L20 30Z" fill="var(--accent)"/><circle cx="48" cy="14" r="5"/>
+      </svg>
+      <div>
+        <p class="kicker" id="kicker">your week</p>
+        <h1 class="display"><span class="name" id="nameTitle">My</span>'s week</h1>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero" aria-label="Today's affirmation">
+    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic"/></svg>
+    <div class="txt">
+      <div class="hi" id="greeting">Good morning</div>
+      <div class="aff display" id="todayAff"></div>
+      <div class="coming" id="coming"></div>
+    </div>
+  </section>
+
+  <nav class="tabs" role="tablist" aria-label="Planner sections">
+    <button class="tab" role="tab" aria-selected="true" aria-controls="week" id="t-week">My week</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="add" id="t-add">Add shifts &amp; plans</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="school" id="t-school">School dates &amp; calendars</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="routine" id="t-routine">My courses, routine &amp; look</button>
+  </nav>
+
+  <section class="panel on" id="week" role="tabpanel" aria-labelledby="t-week">
+    <div class="print-only">
+      <div class="display" style="font-size:22px;color:var(--accent-deep)"><span class="pname" style="font-family:var(--name-font);font-weight:var(--name-weight);text-transform:var(--name-case);font-size:40px;color:var(--accent)"></span>'s week · <span class="prange"></span></div>
+      <div style="font-size:12px;color:var(--muted)" id="printGoals"></div>
+    </div>
+    <div class="bar">
+      <button class="icon-btn" id="prev" aria-label="Previous week"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <div class="range display" id="range"></div>
+      <button class="icon-btn" id="next" aria-label="Next week"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="btn" id="thisWeek">This week</button>
+      <span class="spacer"></span>
+      <button class="btn" id="goAdd">+ Add shifts</button>
+      <button class="btn primary" id="print">Print this week</button>
+    </div>
+    <div class="card printpanel" id="printPanel" hidden>
+      <h2 class="display">Print this week</h2>
+      <div class="orients" role="radiogroup" aria-label="Page direction">
+        <label class="orient"><input type="radio" name="pOrient" value="landscape"><span><svg width="34" height="26" viewBox="0 0 34 26" aria-hidden="true"><rect x="1" y="1" width="32" height="24" rx="3" fill="var(--soft)" stroke="currentColor" stroke-width="1.5"/><path d="M6 6v14M11 6v14M16 6v14M21 6v14M26 6v14" stroke="currentColor" stroke-width="1.2" opacity=".6"/></svg>Horizontal · days side by side</span></label>
+        <label class="orient"><input type="radio" name="pOrient" value="portrait"><span><svg width="26" height="34" viewBox="0 0 26 34" aria-hidden="true"><rect x="1" y="1" width="24" height="32" rx="3" fill="var(--soft)" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h16M5 11.5h16M5 16h16M5 20.5h16M5 25h16" stroke="currentColor" stroke-width="1.2" opacity=".6"/></svg>Vertical · one row per day</span></label>
+      </div>
+      <div class="checks">
+        <label><input type="checkbox" id="pLines"> Lines on each day for handwritten notes</label>
+        <label><input type="checkbox" id="pPage"> Add a full notes page</label>
+        <label><input type="checkbox" id="pInk"> Include notes I wrote in the app</label>
+        <label><input type="checkbox" id="pCompact"> Leave out meals and free time (more room to write)</label>
+      </div>
+      <p class="hint" style="margin:0">If your print window asks, choose the same direction (portrait for vertical, landscape for horizontal).</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn primary" id="doPrint">Print</button><button class="btn" id="cancelPrint">Cancel</button></div>
+    </div>
+    <div class="banner" id="startBanner" hidden>
+      <p><strong>Your week is already planned around sleep, meals and study.</strong> Add your classes and work shifts and it rebuilds every day around them.</p>
+      <button class="btn primary" id="bannerClasses">Add my classes</button>
+      <button class="btn" id="bannerShifts">Add shifts</button>
+    </div>
+    <div class="studybar" id="studybar"></div>
+    <div class="legend" id="legend"></div>
+    <div class="week" id="grid"></div>
+    <div class="notespage" id="notesPage"></div>
+  </section>
+
+  <section class="panel" id="add" role="tabpanel" aria-labelledby="t-add">
+    <div class="bar">
+      <button class="icon-btn" id="prev2" aria-label="Previous week"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <div class="range display" id="range2"></div>
+      <button class="icon-btn" id="next2" aria-label="Next week"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <h2 class="display">Type in your week</h2>
+        <p class="hint">One per line: a day and a time. Day names mean the week shown above, or use a date like 10/14. Anything else on the line becomes its name. You can paste straight from a work scheduling app.<br><em>e.g.</em> Wed 7am-12pm · Thu 1:00-6:30 PM · Fri 10/16 game night 7-10pm</p>
+        <label class="f" for="paste">Shifts &amp; plans</label>
+        <textarea id="paste" placeholder="Wed 7:00 AM – 12:00 PM&#10;Thu 1:00 – 6:30 PM&#10;Sat 8-2"></textarea>
+        <div class="row" style="margin-top:10px">
+          <label class="f">These are
+            <select id="pasteType">
+              <option value="work">Work shifts</option><option value="event">Fun plans &amp; outings</option>
+              <option value="appt">Appointments</option><option value="class">Extra classes / exams</option>
+            </select>
+          </label>
+          <label class="f" style="justify-content:flex-end">&nbsp;<button class="btn primary" id="addPaste">Add to my calendar</button></label>
+        </div>
+        <div class="msg" id="pasteMsg" role="status"></div>
+      </div>
+      <div class="card">
+        <h2 class="display">Add one thing</h2>
+        <p class="hint">A shift, a trip, an appointment, a study group: anything with a time.</p>
+        <div class="row">
+          <label class="f">Date<input type="date" id="fDate"></label>
+          <label class="f">Type
+            <select id="fType"><option value="work">Work shift</option><option value="event">Fun plan / outing</option><option value="appt">Appointment</option><option value="class">Class / exam</option></select>
+          </label>
+        </div>
+        <div class="row">
+          <label class="f">Starts<input type="time" id="fStart" value="09:00"></label>
+          <label class="f">Ends<input type="time" id="fEnd" value="13:00"></label>
+        </div>
+        <label class="f" style="margin-bottom:12px">Name (optional)<input type="text" id="fLabel" placeholder="Work shift"></label>
+        <button class="btn primary" id="addOne">Add it</button>
+        <div class="msg" id="oneMsg" role="status"></div>
+      </div>
+      <div class="card">
+        <h2 class="display">This week's plans</h2>
+        <p class="hint">Tap × to remove something. Classes live under “My courses, routine &amp; look.”</p>
+        <ul class="list" id="evList"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="school" role="tabpanel" aria-labelledby="t-school">
+    <div class="cards">
+      <div class="card">
+        <h2 class="display">Snap your school calendar</h2>
+        <p class="hint">Take a photo or screenshot of your school's academic calendar. The planner reads it and finds days off, registration and application deadlines, and term dates. You check everything before it's added. Reading a photo needs an internet connection the first time.</p>
+        <label class="btn primary" style="display:inline-flex;align-items:center;cursor:pointer;position:relative">Take or choose a photo<input type="file" id="calPhoto" accept="image/*" style="position:absolute;opacity:0;width:1px;height:1px"></label>
+        <div class="progress" id="ocrBar" hidden><i id="ocrFill"></i></div>
+        <div class="msg" id="ocrMsg" role="status"></div>
+        <details style="margin-top:6px">
+          <summary style="cursor:pointer;color:var(--accent-deep);font-weight:500;min-height:32px">Or paste the calendar text instead</summary>
+          <p class="hint" style="margin-top:8px">Copy the dates from your school's website or PDF and paste them here, one per line (e.g. “Nov 26–29 Thanksgiving break, no classes”).</p>
+          <textarea id="calText" aria-label="School calendar text"></textarea>
+          <button class="btn" id="calTextGo" style="margin-top:8px">Find the dates</button>
+        </details>
+      </div>
+      <div class="card" id="reviewCard" hidden>
+        <h2 class="display">Check what we found</h2>
+        <p class="hint">Uncheck anything that's wrong, fix a date or name, then add them.</p>
+        <div class="tablewrap"><table class="review"><thead><tr><th>Add</th><th>Date</th><th>To</th><th>Type</th><th>What</th></tr></thead><tbody id="reviewRows"></tbody></table></div>
+        <div id="termOffer" class="hint" style="margin-top:10px"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px"><button class="btn primary" id="reviewAdd">Add to my planner</button><button class="btn" id="reviewCancel">Cancel</button></div>
+      </div>
+      <div class="card">
+        <h2 class="display">My school dates</h2>
+        <p class="hint">Days off hide your classes that day. Deadlines show up on your week and in “Coming up.”</p>
+        <ul class="list dlist" id="dateList"></ul>
+        <div class="row" style="margin-top:12px">
+          <label class="f">Date<input type="date" id="dDate"></label>
+          <label class="f">Type<select id="dKind"><option value="off">Day off / no classes</option><option value="deadline">Deadline</option><option value="event">School event</option></select></label>
+        </div>
+        <label class="f" style="margin-bottom:10px">What<input type="text" id="dLabel" placeholder="Winter registration opens"></label>
+        <button class="btn" id="dAdd">+ Add a date</button>
+      </div>
+      <div class="card">
+        <h2 class="display">Google &amp; Outlook calendars</h2>
+        <p class="hint"><strong>Bring your calendar in:</strong> export it as a calendar file (.ics) and load it here. Your events show up in your week and the planner works around them.</p>
+        <details class="hint"><summary style="cursor:pointer;color:var(--accent-deep);min-height:32px">How to get the file</summary>
+          <p><strong>Google Calendar</strong> (on a computer): Settings → Import &amp; export → Export. Unzip the download and pick your calendar's .ics file.</p>
+          <p><strong>Outlook.com</strong>: Settings → Calendar → Shared calendars → Publish a calendar → copy the ICS link, open it, and save the file. <strong>Outlook app</strong>: File → Save Calendar.</p>
+        </details>
+        <label class="btn" style="display:inline-flex;align-items:center;cursor:pointer;position:relative;margin-bottom:12px">Load a calendar file (.ics)<input type="file" id="icsIn" accept=".ics,text/calendar" style="position:absolute;opacity:0;width:1px;height:1px"></label>
+        <p class="hint" style="margin-top:6px"><strong>Send your plan out:</strong> download this week's plan (classes, work, study, walks) and school dates as a file, then import it into Google Calendar (Settings → Import &amp; export → Import) or Outlook (Add calendar → Upload from file).</p>
+        <button class="btn" id="icsOut">Download this week (.ics)</button>
+        <div class="msg" id="icsMsg" role="status"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="routine" role="tabpanel" aria-labelledby="t-routine">
+    <div class="cards">
+      <div class="card" id="classesCard">
+        <h2 class="display">My courses</h2>
+        <p class="hint">Credits set your weekly study time. Class times repeat every week; add the term's first and last day so they stop after the term. Online course with no set time? Leave the days blank.</p>
+        <div id="classList"></div>
+        <button class="btn" id="addClass">+ Add a course</button>
+      </div>
+      <div class="card">
+        <h2 class="display">My routine</h2>
+        <p class="hint">Every day is built around these. On early-start days it wakes you earlier and moves bedtime up the night before, so you still get your sleep.</p>
+        <div class="row"><label class="f">My name<input type="text" id="sName"></label><label class="f">Usual wake-up<input type="time" id="sWake"></label></div>
+        <div class="row"><label class="f">Latest bedtime<input type="time" id="sBed"></label><label class="f">Sleep goal (hours)<input type="number" id="sSleep" min="6" max="11" step="0.5"></label></div>
+        <div class="row"><label class="f">Getting ready (min)<input type="number" id="sReady" min="15" max="180" step="15"></label><label class="f">Night routine (min)<input type="number" id="sNight" min="0" max="120" step="15"></label></div>
+        <div class="row"><label class="f">Travel time (min)<input type="number" id="sCommute" min="0" max="120" step="5"></label><label class="f">Walk / outdoor time (min)<input type="number" id="sWalk" min="30" max="240" step="15"></label></div>
+        <div class="row"><label class="f">Study hours per credit, each week
+          <select id="sHpc"><option value="1">1 hour</option><option value="1.5">1.5 hours</option><option value="2">2 hours (recommended)</option><option value="2.5">2.5 hours</option><option value="3">3 hours</option></select></label>
+          <label class="f">Most study in one day (hours)<input type="number" id="sMaxDay" min="1" max="8" step="0.5"></label></div>
+        <label class="f">Weekly walk day
+          <select id="sWalkDay"><option value="auto">Pick my freest day</option><option value="1">Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option><option value="6">Saturday</option><option value="0">Sunday</option></select>
+        </label>
+      </div>
+      <div class="card">
+        <h2 class="display">My look</h2>
+        <p class="hint">Changes the whole planner, including printouts.</p>
+        <div class="looks" id="sLooks" style="margin-bottom:14px"></div>
+        <div class="swatches" id="sSwatches" role="radiogroup" aria-label="Theme color"></div>
+      </div>
+      <div class="card">
+        <h2 class="display">Keep it safe</h2>
+        <p class="hint">Everything saves on this device and nothing is sent anywhere. Save a backup now and then so you can move your planner to a new computer.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn primary" id="backup">Save a backup</button>
+          <label class="btn" style="display:inline-flex;align-items:center;cursor:pointer;position:relative">Load a backup<input type="file" id="restore" accept="application/json,.json" style="position:absolute;opacity:0;width:1px;height:1px"></label>
+          <button class="btn" id="clearEv">Clear all shifts &amp; plans</button>
+        </div>
+        <div class="msg" id="safeMsg" role="status"></div>
+      </div>
+    </div>
+  </section>
+  <p class="foot display" id="foot"></p>
+  <p class="hint no-print" style="text-align:center;margin-top:6px"><a href="support.html" style="color:var(--accent-deep)">Help</a> · <a href="privacy.html" style="color:var(--accent-deep)">Privacy</a></p>
+</div>
+
+<div class="notepad" id="notepad" role="dialog" aria-modal="true" aria-labelledby="npTitle" hidden>
+  <div class="nbox">
+    <div class="nhead"><h2 class="display" id="npTitle">Notes</h2><button class="x" id="npClose" style="background:var(--soft);width:44px;height:44px" aria-label="Close without saving">×</button></div>
+    <div class="ntools" id="npTools">
+      <button class="tool pen" data-pen="#2A2A2A" aria-pressed="true" aria-label="Black pen"><i style="background:#2A2A2A"></i></button>
+      <button class="tool pen" data-pen="accent" aria-pressed="false" aria-label="Theme color pen"><i style="background:var(--accent)"></i></button>
+      <button class="tool pen" data-pen="#2F6F8F" aria-pressed="false" aria-label="Blue pen"><i style="background:#2F6F8F"></i></button>
+      <button class="tool pen" data-pen="#3F7A4F" aria-pressed="false" aria-label="Green pen"><i style="background:#3F7A4F"></i></button>
+      <span class="tsep"></span>
+      <button class="tool" data-size="3" aria-pressed="true">Fine</button>
+      <button class="tool" data-size="7" aria-pressed="false">Bold</button>
+      <button class="tool" id="npErase" aria-pressed="false">Eraser</button>
+      <span class="tsep"></span>
+      <button class="tool" id="npUndo">Undo</button>
+      <button class="tool" id="npClear">Clear</button>
+    </div>
+    <canvas id="npCanvas" width="1000" height="750" aria-label="Handwriting area. Write with your finger, a stylus or a mouse."></canvas>
+    <div class="nfoot"><button class="btn" id="npDelete">Delete note</button><span class="spacer"></span><button class="btn" id="npCancel">Cancel</button><button class="btn primary" id="npSave">Save note</button></div>
+    <div class="msg" id="npMsg" role="status"></div>
+  </div>
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="ic-bloom" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.3 3 4.5 6.7 4.5c2.1 0 3.6 1.1 4.3 2.4.7-1.3 2.2-2.4 4.3-2.4 3.7 0 5.8 3.8 4.3 7.2C19.5 16.4 12 21 12 21z" fill="currentColor" opacity=".85"/></symbol>
+  <symbol id="ic-sage" viewBox="0 0 24 24"><path d="M5 19 C5 10 10 5 20 4 C20 14 15 19 5 19Z M5 19 L13 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-slate" viewBox="0 0 24 24"><path d="M12 2 L14.6 9.4 L22 12 L14.6 14.6 L12 22 L9.4 14.6 L2 12 L9.4 9.4Z" fill="currentColor"/></symbol>
+  <symbol id="ic"><use href="#ic-bloom"/></symbol>
+</svg>
+
+<script>
+const AFFIRMATIONS = [
+"I am exactly where I am meant to be.",
+"My mind is bright and my heart is brave.",
+"I bloom at my own pace, and that is beautiful.",
+"I am capable of amazing things.",
+"Rest is productive, too.",
+"I choose progress over perfection.",
+"I trust myself to figure it out.",
+"I am proud of how hard I work.",
+"I am gentle with myself on busy days.",
+"Good things are on their way to me.",
+"I radiate calm and confidence.",
+"I am becoming the person I dream of being.",
+"I belong in every room I walk into.",
+"My curiosity is my superpower.",
+"I am allowed to take up space.",
+"Every small step still counts.",
+"I learn something new every single day.",
+"I am soft and strong at the same time.",
+"My future self is cheering for me.",
+"I do hard things with a grateful heart.",
+"I am worthy of good grades and good rest.",
+"Today I choose joy on purpose.",
+"I am smart, and I keep getting smarter.",
+"I show up for myself, even when it's hard.",
+"My best is always enough.",
+"I am the main character of my own story.",
+"I can ask for help and still be strong.",
+"My dreams are worth the effort.",
+"I glow when I believe in myself.",
+"I let go of what I can't control.",
+"I am learning to love my own company.",
+"My kindness makes the world softer.",
+"I am resilient, resourceful, and ready.",
+"I focus on what I can do today.",
+"I celebrate my wins, big and tiny.",
+"I am calm, clear, and focused.",
+"I deserve the life I am building.",
+"I am proud of the person I'm becoming.",
+"My energy is precious, and I protect it.",
+"I bring sunshine wherever I go.",
+"I'm allowed to not have it all figured out.",
+"I am grateful for this fresh start.",
+"I trust the timing of my life.",
+"I am confident in my own voice.",
+"I make time for what matters to me.",
+"My mistakes help me grow.",
+"I am a lifelong learner.",
+"I treat my body with love and care.",
+"Hard days don't last, but I do.",
+"I am enough, exactly as I am.",
+"I believe in the person I see in the mirror.",
+"I finish what I start.",
+"I am patient with my progress.",
+"I welcome new friendships and new ideas.",
+"My goals are within reach.",
+"I am full of light and possibility.",
+"I choose thoughts that lift me up.",
+"I am organized, prepared, and ready.",
+"I can do anything for one focused hour.",
+"I'm proud of myself for trying.",
+"I attract kind people and good chances.",
+"I honor my feelings and keep moving forward.",
+"My hard work is quietly paying off.",
+"I speak to myself like someone I love.",
+"I have everything I need to succeed today.",
+"I trust my own good judgment.",
+"I am growing in ways I can't even see yet.",
+"I choose peace over worry.",
+"I am the kind of person who keeps promises to myself.",
+"I am a magnet for good news.",
+"I'm allowed to rest before I'm exhausted.",
+"I am brave enough to raise my hand.",
+"I deserve to feel good in my own skin.",
+"I make my family proud, and I make myself proud.",
+"Every class brings me closer to my dreams.",
+"I am thankful for my mind and all it can do.",
+"I handle challenges with grace.",
+"My heart is open and my mind is sharp.",
+"I give myself credit for how far I've come.",
+"I let myself enjoy the little moments.",
+"I am worthy of my own time and attention.",
+"My potential is limitless.",
+"I am learning, and learning is brave.",
+"I create a life that feels good on the inside.",
+"I am light, loved, and capable.",
+"I am allowed to change my mind and grow.",
+"My confidence grows every time I try.",
+"I am grounded, centered, and at ease.",
+"I find beauty in ordinary days.",
+"I believe good things are happening for me.",
+"I am in charge of how I start my day.",
+"I am worth every ounce of effort I give myself.",
+"I'm doing better than I think I am.",
+"I let my inner light shine.",
+"I can be a work in progress and a masterpiece at once.",
+"Today I will be kind to my future self.",
+"I trust the process and enjoy the journey.",
+"I am unstoppable when I set my mind to something.",
+"I love the life I'm creating.",
+"I am capable of learning anything I choose.",
+"I am thankful for the people who love me.",
+"My dreams are valid and worth chasing.",
+"I have the courage to begin.",
+"I am worthy of success and happiness.",
+"I let go of comparison; my path is my own.",
+"I am steady, even when life is busy.",
+"I choose to see the good today.",
+"My effort today is a gift to tomorrow.",
+"I am allowed to shine brightly.",
+"I stay curious, not critical.",
+"I can do this, one step at a time.",
+"I carry myself with grace and confidence.",
+"I am proud of the balance I'm creating.",
+"I am more than my grades; I am a whole, wonderful person.",
+"I deserve friendships that feel like home.",
+"I am wildly capable.",
+"I trust that I'm learning exactly what I need.",
+"My feelings are valid, and they pass.",
+"I am calm under pressure.",
+"I celebrate who I am today.",
+"I am a good friend to myself.",
+"I turn nerves into excitement.",
+"I invest in myself because I'm worth it.",
+"I get to learn today, and that's a privilege.",
+"I am the author of my own life.",
+"I welcome abundance into my life.",
+"I am patient with myself while I learn.",
+"My smile is contagious.",
+"I rise every time I fall.",
+"I am filled with gratitude for today.",
+"I am comfortable being myself.",
+"I notice how much I've already learned.",
+"I stay true to my values.",
+"I am worthy of rest without guilt.",
+"I am a bright spot in someone's day.",
+"I can handle whatever this day brings.",
+"I am becoming more confident every day.",
+"I make my dreams a priority.",
+"I am strong enough to be soft.",
+"I'm creating habits that love me back.",
+"I am a problem-solver.",
+"I believe in my ability to grow.",
+"I am lucky, loved, and learning.",
+"I am the calm in my own storm.",
+"I let myself be proud without shrinking.",
+"I choose courage over comfort.",
+"I am kind, clever, and capable.",
+"I am worthy of big, beautiful dreams.",
+"I trust my path, even when it curves.",
+"I give my best and release the rest.",
+"I am thriving, not just surviving.",
+"My voice matters.",
+"I have a beautiful mind.",
+"I am becoming my own best friend.",
+"I honor my need for quiet time.",
+"I'm allowed to take things one day at a time.",
+"I am brave in small ways every day.",
+"I am grateful for this season of growth.",
+"I fill my own cup first.",
+"I am proud of my progress this week.",
+"I believe I can, so I will.",
+"I find joy in learning new things.",
+"I am radiant from the inside out.",
+"I'm allowed to be both a beginner and brilliant.",
+"I keep going, even when it's slow.",
+"I am full of good ideas.",
+"I treat every day like a fresh page.",
+"I am enough, and I have enough.",
+"I spend my energy on what lights me up.",
+"I am confident in who I'm becoming.",
+"I choose to be proud, not perfect.",
+"I have survived every hard day so far.",
+"I bring my whole heart to everything I do.",
+"I'm building a future I'm excited about.",
+"I am open to wonderful surprises.",
+"I focus on the next right step.",
+"I am deeply loved.",
+"I make space for fun in my life.",
+"I'm allowed to celebrate myself.",
+"I learn from yesterday and live for today.",
+"I am a sweet mix of fierce and gentle.",
+"I trust my own pace.",
+"I let my confidence lead the way.",
+"I am worthy of the love I give others.",
+"I believe in second chances, especially for me.",
+"My hard work turns into beautiful results.",
+"I am thankful for every lesson.",
+"I am fearless in pursuit of what sets my soul on fire.",
+"I nourish my body and my mind.",
+"I attract peace and positivity.",
+"I say yes to the things that help me grow.",
+"I say no to what drains my light.",
+"I am rooted and blooming.",
+"I am proud to be exactly me.",
+"My presence is a present.",
+"I am steady like the moon and bright like the sun.",
+"I am capable of calm, clear thinking.",
+"I don't have to be perfect to be amazing.",
+"I trust myself to make good choices.",
+"I let myself enjoy my success.",
+"I am learning to love the process.",
+"I am worthy of my goals.",
+"I make the most of my time today.",
+"I carry sunshine in my pocket.",
+"I am a beautiful work in progress.",
+"I believe in the power of yet.",
+"I am becoming stronger with every challenge.",
+"I am grateful to be growing.",
+"I am allowed to shine without apology.",
+"I find strength in stillness.",
+"I am ready to learn, grow, and glow.",
+"I trust that I am on the right path.",
+"I am full of potential and promise.",
+"I choose happiness in small moments.",
+"I have a heart full of hope.",
+"I deserve to be proud of myself.",
+"I set goals and I crush them.",
+"I am always growing.",
+"I bring my best self to today.",
+"I am calm, capable, and in control.",
+"My dreams are growing wings.",
+"I let myself be a beginner.",
+"I am resilient in every season.",
+"I choose thoughts that feel like sunshine.",
+"I can take a deep breath and start again.",
+"I am proud of the work I put in.",
+"I am brave enough to be myself.",
+"I am thankful for today's opportunities.",
+"I deserve good things, and they're coming.",
+"I am sparkling with possibility.",
+"I have what it takes.",
+"I am building a life I love, one day at a time.",
+"I am stronger than my doubts.",
+"I give myself grace when plans change.",
+"I love the person I'm growing into.",
+"I am powerful beyond measure.",
+"I trust myself to rise to the occasion.",
+"I am worthy of love, rest, and joy.",
+"I welcome today with an open heart.",
+"I am confident in my ability to learn.",
+"I shine brightest when I'm being myself.",
+"I make wise choices for my future.",
+"I am thankful for my beautiful life.",
+"I stay focused on my goals.",
+"I am patient, persistent, and positive.",
+"I believe my best days are ahead.",
+"I am a light in this world.",
+"I trust that everything is working out for me.",
+"I choose to see challenges as chances to grow.",
+"I am proud of my determination.",
+"I honor my body with rest and care.",
+"I am worthy of every opportunity.",
+"I am calm, happy, and whole.",
+"I spread kindness wherever I go.",
+"I love learning about myself.",
+"I am ready for whatever today holds.",
+"I am grateful for my strength.",
+"I keep my promises to myself.",
+"I am blossoming in beautiful ways.",
+"I am open to learning from everyone I meet.",
+"I believe in my dreams, and I work for them.",
+"I am doing my very best, and that's beautiful.",
+"I trust the little voice that says I can.",
+"I choose to be the reason someone smiles today.",
+"I am unafraid to try new things.",
+"I am proud of how I handle hard moments.",
+"I let go of what no longer serves me.",
+"I am growing wiser every day.",
+"I am confident, capable, and kind.",
+"I give myself permission to rest.",
+"I am thankful for the lessons of this week.",
+"I am worthy of great things.",
+"My heart is full and my mind is clear.",
+"I am in love with my own growth.",
+"I am calm when things feel chaotic.",
+"I choose to believe in myself today.",
+"I am grateful for new beginnings.",
+"I am a force of good in the world.",
+"I have endless reasons to smile.",
+"I learn at my own pace, and that is perfect.",
+"I am proud of the balance I keep.",
+"I trust my intuition.",
+"I am thankful for my wonderful mind.",
+"I am radiant, resilient, and rising.",
+"I welcome success with open arms.",
+"I believe in the magic of new beginnings.",
+"I am enough today and every day.",
+"I choose to make today count.",
+"I am always learning and always growing.",
+"I love who I am becoming.",
+"I shine through every challenge.",
+"I am brave, bold, and beautiful.",
+"I am the calm after every storm.",
+"I trust myself more every day.",
+"I choose gratitude over worry.",
+"I let my light guide me.",
+"I am capable of beautiful things.",
+"I am proud of my fresh start.",
+"I believe in the person I'm becoming.",
+"I have so much to offer the world.",
+"I am grateful for every little win.",
+"I rest, I reset, and I rise.",
+"I am learning to trust my own wings.",
+"I am worthy of the dreams in my heart.",
+"I face today with courage and a smile.",
+"I am full of love and light.",
+"I give myself credit for showing up.",
+"I am proud to be growing.",
+"I trust that I'll know what to do.",
+"I bring beauty to everything I touch.",
+"I am unstoppable, one step at a time.",
+"I am steady, strong, and sure.",
+"I am thankful for the chance to learn.",
+"I choose joy, again and again.",
+"I am a gift to the people around me.",
+"I believe today will be wonderful.",
+"I am worthy of taking my time.",
+"I love myself through every season.",
+"I am brave enough to keep going.",
+"I am growing into my greatness.",
+"I welcome calm into my busy days.",
+"I am thankful for my courage.",
+"I shine in my own special way.",
+"I am learning to be proud out loud.",
+"I trust the beautiful unfolding of my life.",
+"I am worthy of rest and of results.",
+"I am becoming more myself every day.",
+"I choose kindness, especially toward me.",
+"I am proud of the life I'm building.",
+"I have a strong mind and a gentle heart.",
+"I am grateful to be exactly who I am.",
+"I welcome new chapters with excitement.",
+"I am capable of reaching every goal I set.",
+"I celebrate how far I've come this year.",
+"I am full of quiet confidence.",
+"I trust myself to begin again.",
+"I am a bright, beautiful soul.",
+"I choose to end this day with gratitude.",
+"I am proud of my heart.",
+"I believe in beautiful beginnings.",
+"I am thankful for every sunrise.",
+"I let myself dream big and plan bravely.",
+"I carry my confidence with me everywhere.",
+"I am growing in grace and grit.",
+"I choose to trust the process today.",
+"I am loved more than I know.",
+"I am proud of who I was this year.",
+"I welcome the new year of me.",
+"I am thankful for rest, reflection, and renewal.",
+"I end each day proud of my effort.",
+"I am ready for my next beautiful chapter.",
+"I am the best investment I'll ever make.",
+"I let my kindness be my loudest trait.",
+"I look for the lesson and keep the joy.",
+"I am proud of the quiet work no one sees.",
+"I give today my whole heart.",
+"I study, I rest, and I grow.",
+"I let fresh air clear my mind.",
+"I am allowed to be proud of a quiet, steady day.",
+"I pour love into my goals and my goals love me back.",
+"I have room in my life for both hard work and delight.",
+"I am worthy of a slow, sweet morning.",
+"I make friends with the unknown.",
+"I bring warmth to every conversation.",
+"I am a fast learner and a kind teacher to myself.",
+"I trust that small habits create big magic.",
+"I wake up ready to write a beautiful day.",
+"I remember that I've done hard things before.",
+"I am proud of my soft heart and my strong spine."
+];
+
+
+/* ---------- looks & colors ---------- */
+const LOOKS = {
+  bloom:{label:'Soft', blurb:'Script name, blush tones, arches', chips:['#F7CFDC','#EDE4F7','#D9EEE2','#FBEBB5'], font:"'Parisienne',cursive", defaultColor:'rose',
+    ready:'Rise, shine & get ready', sleep:'Beauty sleep', me:'Me time ♡', lunch:'Pack a lunch ♡', dinner:'Pack a dinner ♡', walk:'Hike or nature walk', walkNote:'fresh air & sunshine', rest:'Rest & recharge', kicker:"you've got this", foot:'planned with care for {name} ♡', goals:'8+ hrs of beauty sleep · study every day · one walk a week ♡'},
+  sage:{label:'Natural', blurb:'Clean serif, earthy calm tones', chips:['#E3E8D8','#EFE3D3','#D8E6E4','#F1E8C8'], font:"'Fraunces',serif", defaultColor:'sage',
+    ready:'Wake up & get ready', sleep:'Sleep', me:'Free time', lunch:'Pack a lunch', dinner:'Pack a dinner', walk:'Walk or hike', walkNote:'fresh air', rest:'Rest & recharge', kicker:'one day at a time', foot:'planned for {name}', goals:'Sleep first · study every day · one walk a week'},
+  slate:{label:'Bold', blurb:'Strong type, cool steel tones', chips:['#D6E0EE','#E8DCCB','#D5E8DF','#DDE3E9'], font:"'Barlow Condensed',sans-serif", defaultColor:'navy',
+    ready:'Get ready', sleep:'Sleep', me:'Free time', lunch:'Pack a lunch', dinner:'Pack a dinner', walk:'Hike / outdoor time', walkNote:'get outside', rest:'Recharge', kicker:'own your week', foot:"{name}'s week, handled", goals:'Sleep · study · train · repeat'},
+};
+const COLORS = {
+  rose:{name:'Rose', a:'#B04A72', d:'#8E3B5A', s:'#FDEEF2', l:'#F1C9D6'},
+  lavender:{name:'Lavender', a:'#7A5BA8', d:'#5E4488', s:'#F3EEFA', l:'#DCD0EE'},
+  sage:{name:'Sage', a:'#557A5B', d:'#3F5F45', s:'#EEF4EE', l:'#CFE0D1'},
+  ocean:{name:'Ocean', a:'#2F6F8F', d:'#235670', s:'#EAF3F7', l:'#C7DEE9'},
+  navy:{name:'Navy', a:'#2B4570', d:'#1E3354', s:'#ECF0F6', l:'#C8D3E4'},
+  clay:{name:'Clay', a:'#A65A3A', d:'#86452B', s:'#FAEFE9', l:'#EACBBC'},
+  gold:{name:'Gold', a:'#86651C', d:'#6B5016', s:'#F8F2E3', l:'#E6D6AE'},
+  charcoal:{name:'Charcoal', a:'#3F4650', d:'#2A2F36', s:'#EFF0F2', l:'#CDD1D6'},
+};
+const CAT_NAMES = {class:'Class', work:'Work', study:'Study', fun:'Walks & fun', appt:'Appointments & calendar', routine:'Routine & sleep', meal:'Meals & free time'};
+const TYPE_CAT = {work:'work', event:'fun', appt:'appt', class:'class', cal:'appt'};
+const TYPE_LABEL = {work:'Work shift', event:'Plans', appt:'Appointment', class:'Class', cal:'Calendar event'};
+const KIND_LABEL = {off:'Day off', deadline:'Deadline', event:'School event'};
+
+/* ---------- state ---------- */
+const KEY = 'schedule-compass-v1';
+const DEFAULTS = {
+  settings:{name:'', look:'bloom', color:'rose', onboarded:false, wake:'07:00', bedtime:'22:30', sleepHrs:8, readyMins:60, nightMins:30,
+            commuteMins:30, walkMins:60, hoursPerCredit:2, maxStudyDay:4, walkDay:'auto'},
+  classes:[], events:[], dates:[], notes:{},
+  printOpts:{orient:'landscape', lines:true, page:false, ink:true, compact:true}
+};
+let S;
+const clone = o => JSON.parse(JSON.stringify(o));
+function normalize(d){ const b = clone(DEFAULTS);
+  return {settings:Object.assign(b.settings, d.settings||{}), classes:Array.isArray(d.classes)?d.classes:[], events:Array.isArray(d.events)?d.events:[], dates:Array.isArray(d.dates)?d.dates:[],
+    notes:(d.notes && typeof d.notes === 'object') ? d.notes : {}, printOpts:Object.assign(b.printOpts, d.printOpts||{})}; }
+function load(){ try{ const r = localStorage.getItem(KEY); if(r){ S = normalize(JSON.parse(r)); return; } }catch(e){} S = clone(DEFAULTS); }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); return true; }catch(e){ return false; } }
+const uid = () => Math.random().toString(36).slice(2,9);
+const look = () => LOOKS[S.settings.look] || LOOKS.bloom;
+const newCourse = () => ({id:uid(), name:'', credits:3, days:[], start:'09:00', end:'10:30', from:'', until:''});
+
+function applyTheme(lk, col){
+  const root = document.documentElement, c = COLORS[col] || COLORS.rose;
+  root.dataset.look = LOOKS[lk] ? lk : 'bloom';
+  root.style.setProperty('--accent', c.a); root.style.setProperty('--accent-deep', c.d);
+  root.style.setProperty('--soft', c.s); root.style.setProperty('--line', c.l);
+  if(root.dataset.look === 'bloom') root.style.setProperty('--dot', c.l); else root.style.removeProperty('--dot');
+  document.querySelector('#ic use').setAttribute('href', '#ic-'+root.dataset.look);
+}
+
+/* ---------- time helpers ---------- */
+const toMin = t => { const [h,m] = String(t||'0:0').split(':').map(Number); return (h||0)*60+(m||0); };
+const toHHMM = m => String(Math.floor(m/60)%24).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+const up15 = m => Math.ceil(m/15)*15, dn15 = m => Math.floor(m/15)*15;
+function fmt(m, ap=true){ m = ((m%1440)+1440)%1440; let h = Math.floor(m/60); const mm = m%60, a = h<12?'am':'pm'; h = h%12||12; return h+':'+String(mm).padStart(2,'0')+(ap?' '+a:''); }
+function fmtRange(s,e){ return Math.floor((s%1440)/720) === Math.floor((e%1440)/720) ? fmt(s,false)+'–'+fmt(e) : fmt(s)+' – '+fmt(e); }
+const hrs = m => { m = Math.round(m); if(m < 60) return m+' min'; const h = Math.floor(m/60), r = m%60;
+  if(!r) return h+(h===1?' hr':' hrs'); if(r===30) return h+'.5 hrs'; return h+(h===1?' hr ':' hrs ')+r+' min'; };
+const MONTHS = ['Jan','Feb','Mar','Apr','May','June','July','Aug','Sept','Oct','Nov','Dec'];
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const DOW_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const keyOf = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const fromKey = k => { const [y,m,d] = k.split('-').map(Number); return new Date(y,m-1,d,12); };
+const addDays = (k,n) => { const d = fromKey(k); d.setDate(d.getDate()+n); return keyOf(d); };
+const daysBetween = (a,b) => Math.round((fromKey(b)-fromKey(a))/864e5);
+function mondayOf(d){ const x = new Date(d.getFullYear(),d.getMonth(),d.getDate(),12); x.setDate(x.getDate()-((x.getDay()+6)%7)); return keyOf(x); }
+const niceDate = k => { const d = fromKey(k); return MONTHS[d.getMonth()]+' '+d.getDate(); };
+const todayKey = () => keyOf(new Date());
+function affirmationFor(k){
+  const d = fromKey(k), doy = Math.round((d - new Date(d.getFullYear(),0,1,12))/864e5);
+  let a = AFFIRMATIONS[doy % AFFIRMATIONS.length];
+  return a;
+}
+
+/* ---------- school dates ---------- */
+const datesOn = k => S.dates.filter(d => k >= d.start && k <= (d.end || d.start));
+const isDayOff = k => datesOn(k).some(d => d.kind === 'off');
+
+/* ---------- scheduler ---------- */
+function fixedFor(k){
+  const dow = fromKey(k).getDay(), out = [], off = isDayOff(k);
+  if(!off) for(const c of S.classes){
+    if(!c.days || !c.days.includes(dow)) continue;
+    if(c.from && k < c.from) continue; if(c.until && k > c.until) continue;
+    out.push({s:toMin(c.start), e:toMin(c.end), cat:'class', label:c.name||'Class'});
+  }
+  for(const ev of S.events){
+    if(ev.date !== k) continue;
+    let s = toMin(ev.start), e = toMin(ev.end); if(e <= s) e += 1440;
+    out.push({s, e, cat:TYPE_CAT[ev.type]||'fun', label:ev.label||TYPE_LABEL[ev.type]||'Plans'});
+  }
+  return out.sort((a,b)=>a.s-b.s);
+}
+function wakeFor(k){ const st = S.settings, f = fixedFor(k).filter(b=>b.s >= 4*60), dw = toMin(st.wake); if(!f.length) return dw;
+  return Math.max(240, Math.min(dw, dn15(f[0].s - st.commuteMins - st.readyMins))); }
+function bedFor(k){ const st = S.settings; let latest = toMin(st.bedtime); if(latest < 12*60) latest += 1440;
+  return dn15(Math.min(latest, wakeFor(addDays(k,1)) + 1440 - st.sleepHrs*60)); }
+function subtract(gaps,s,e){ const o = []; for(const [a,b] of gaps){ if(e<=a||s>=b){o.push([a,b]);continue;} if(s>a) o.push([a,s]); if(e<b) o.push([e,b]); } return o.filter(([a,b])=>b>a); }
+function fit(gaps, lo, hi, len, prefer){ let best = null;
+  for(const [a,b] of gaps){ const L = up15(Math.max(a,lo)), H = Math.min(b,hi); if(H-L < len) continue;
+    let st = Math.min(Math.max(up15(prefer),L), dn15(H-len)); if(st < L) st = L;
+    if(best===null || Math.abs(st-prefer) < Math.abs(best-prefer)) best = st; }
+  return best; }
+function walkDayIndex(days){ const st = S.settings;
+  if(st.walkDay !== 'auto'){ const w = Number(st.walkDay); return days.findIndex(k=>fromKey(k).getDay()===w); }
+  let bi = 0, bs = Infinity;
+  days.forEach((k,i)=>{ const f = fixedFor(k); const sc = f.reduce((t,b)=>t+(b.e-b.s),0) + (f.some(b=>b.cat==='work')?1000:0); if(sc < bs){ bs = sc; bi = i; } });
+  return bi; }
+function packNote(fixed, lo, hi, text){ let best = null, ov = 0;
+  for(const b of fixed){ const o = Math.min(b.e,hi) - Math.max(b.s,lo); if(o > ov){ ov = o; best = b; } }
+  if(best && !best.note) best.note = text; }
+
+/* Weekly study goal from credits (falls back to 1 hr a day with no courses entered). */
+function weeklyGoal(){
+  const credits = S.classes.reduce((t,c)=>t+(parseFloat(c.credits)||0), 0);
+  return {credits, minutes: credits > 0 ? Math.round(credits * S.settings.hoursPerCredit * 60 / 15) * 15 : 7*60};
+}
+function courseQueue(){
+  const hpc = S.settings.hoursPerCredit;
+  return S.classes.filter(c=>(parseFloat(c.credits)||0) > 0).map(c=>({name:(c.name||'').trim() || 'a course', need:(parseFloat(c.credits)||0)*hpc*60}));
+}
+function pickCourse(q, avoid){
+  if(!q.length) return null;
+  const sorted = [...q].sort((a,b)=>b.need-a.need);
+  const pick = (sorted.length > 1 && sorted[0].name === avoid) ? sorted[1] : sorted[0];
+  return pick;
+}
+
+/* Build one day. target = study minutes wanted today; q = shared course queue (mutated). */
+function planDay(k, isWalkDay, target, q){
+  const st = S.settings, L = look(), blocks = [];
+  const wake = wakeFor(k), readyEnd = wake + st.readyMins, bed = bedFor(k), nightStart = bed - st.nightMins;
+  const fixed = fixedFor(k).map(b=>({...b}));
+  for(let i=0;i<fixed.length;i++) for(let j=i+1;j<fixed.length;j++) if(fixed[i].e > fixed[j].s) fixed[i].conflict = fixed[j].conflict = true;
+  blocks.push({s:wake, e:readyEnd, cat:'routine', label:L.ready});
+  fixed.forEach(b=>{ if(b.conflict) b.note = 'Overlaps something. Check!'; blocks.push(b); });
+  // BUF = breathing room between planned items, so one never ends at the minute the next begins
+  const BUF = 15;
+  let gaps = [[readyEnd + BUF, nightStart - BUF]];
+  for(const b of fixed) gaps = subtract(gaps, b.s - Math.max(st.commuteMins, BUF), b.e + BUF);
+  const place = (s,e,cat,label,note) => { blocks.push({s,e,cat,label,note}); gaps = subtract(gaps, s - BUF, e + BUF); };
+  const g0 = gaps.find(g=>g[0]===readyEnd + BUF);
+  if(g0 && g0[1]-g0[0] >= 45) place(readyEnd + BUF, readyEnd + BUF + 30, 'meal', 'Breakfast');
+  const lunch = fit(gaps, 11*60+30, 14*60+15, 45, 12*60);
+  if(lunch!==null) place(lunch, lunch+45, 'meal', 'Lunch'); else packNote(fixed, 11*60+30, 14*60, L.lunch);
+  const dinner = fit(gaps, 17*60, 20*60+30, 60, 18*60);
+  if(dinner!==null) place(dinner, dinner+60, 'meal', 'Dinner'); else packNote(fixed, 17*60, 20*60, L.dinner);
+  for(const b of fixed){ if(b.e - b.s < 240) continue;
+    const g = gaps.find(([a,z]) => a >= b.e && a <= b.e+30 && z-a >= 75); if(g){ const s = up15(g[0]); place(s, s+30, 'meal', L.rest); } }
+  if(isWalkDay){ let w = fit(gaps, 14*60, 18*60+30, st.walkMins, 15*60); if(w===null) w = fit(gaps, 8*60+30, 18*60+30, st.walkMins, 9*60);
+    if(w!==null) place(w, w+st.walkMins, 'fun', L.walk, L.walkNote); }
+  const studyEnd = Math.min(nightStart, 21*60+30);
+  const usable = ([a,b]) => Math.min(b, studyEnd) - up15(Math.max(a, 8*60));
+  const capacity = Math.min(st.maxStudyDay*60, gaps.reduce((t,g)=>{ const u = Math.floor(usable(g)/15)*15; return t + (u >= 45 ? u : 0); }, 0));
+  let studied = 0, guard = 0, last = null;
+  while(target - studied >= 45 && guard++ < 12){
+    const want = Math.min(target - studied, 120);
+    const whole = [...gaps].sort((x,y)=>x[0]-y[0]).filter(g=>usable(g) >= want);
+    const order = whole.length ? whole : [...gaps].sort((x,y)=>usable(y)-usable(x));
+    let done = false;
+    for(const [a,b] of order){ const Ls = up15(Math.max(a,8*60)), H = Math.min(b,studyEnd);
+      let chunk = Math.min(target - studied, Math.floor((H-Ls)/15)*15, 120);
+      if(chunk < 45) continue;
+      const c = q ? pickCourse(q, last) : null;
+      let label = 'Study session · '+hrs(chunk);
+      if(c){ label = 'Study: '+c.name+' · '+hrs(chunk); c.need -= chunk; last = c.name; }
+      place(Ls, Ls+chunk, 'study', label); studied += chunk; done = true; break; }
+    if(!done) break;
+  }
+  for(const [a,b] of gaps){ const s = up15(a), e = dn15(b); if(e-s >= 45) blocks.push({s, e, cat:'meal', label:L.me}); }
+  if(st.nightMins > 0) blocks.push({s:nightStart, e:bed, cat:'routine', label:'Night routine & wind down'});
+  const nw = wakeFor(addDays(k,1));
+  blocks.push({s:bed, e:bed, cat:'routine', label:L.sleep+' · '+hrs(nw+1440-bed), note:'up at '+fmt(nw), sleep:true});
+  blocks.sort((a,b)=>a.s-b.s || (a.sleep?1:0)-(b.sleep?1:0));
+  return {blocks, studied, capacity};
+}
+
+/* Spread the weekly study goal across the days that have room ("water filling"). */
+function planWeek(days){
+  const wi = walkDayIndex(days);
+  const caps = days.map((k,i)=>planDay(k, i===wi, 0, null).capacity);
+  const goal = weeklyGoal().minutes;
+  const alloc = days.map(()=>0);
+  let remaining = goal;
+  for(let round = 0; round < 8 && remaining >= 45; round++){
+    const open = days.map((_,i)=>i).filter(i=>caps[i] - alloc[i] >= 45);
+    if(!open.length) break;
+    const share = Math.max(45, dn15(remaining / open.length));
+    for(const i of open){ const give = Math.min(share, caps[i]-alloc[i], remaining); if(give < 45) continue; alloc[i] += dn15(give); remaining -= dn15(give); if(remaining < 45) break; }
+  }
+  for(let pass = 0; pass < 40 && remaining >= 15; pass++){
+    const i = days.map((_,j)=>j).filter(j=>alloc[j] > 0 && caps[j] - alloc[j] >= 15).sort((x,y)=>alloc[x]-alloc[y])[0];
+    if(i === undefined) break; alloc[i] += 15; remaining -= 15;
+  }
+  const q = courseQueue();
+  const plans = days.map((k,i)=>planDay(k, i===wi, alloc[i], q));
+  const planned = plans.reduce((t,p)=>t+p.studied, 0);
+  return {plans, goal, planned};
+}
+
+/* ---------- rendering ---------- */
+let weekStart = mondayOf(new Date());
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ICON = (sz=14) => `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-${S.settings.look}"/></svg>`;
+const PEN = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l4-1L19 8l-3-3L5 16l-1 4z"/><path d="M14 7l3 3"/></svg>';
+const FLAG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>';
+const weekDays = () => Array.from({length:7},(_,i)=>addDays(weekStart,i));
+const rangeText = () => { const d = weekDays(); return niceDate(d[0])+' – '+niceDate(d[6]); };
+
+function renderAll(){
+  applyTheme(S.settings.look, S.settings.color);
+  const L = look(), n = S.settings.name.trim();
+  document.title = n ? n+"'s Week" : 'Schedule Compass';
+  $('nameTitle').textContent = n || 'My';
+  document.querySelector('.brand h1').lastChild.textContent = n ? "'s week" : ' week';
+  document.querySelectorAll('.pname').forEach(x=>x.textContent = n || 'My');
+  $('kicker').textContent = L.kicker; $('printGoals').textContent = L.goals;
+  $('foot').textContent = n ? L.foot.replace('{name}', n) : '';
+  const now = new Date(), h = now.getHours();
+  $('greeting').textContent = (h<12?'Good morning':h<17?'Good afternoon':'Good evening')+(n?', '+n:'')+' · '+DAYS[now.getDay()]+', '+MONTHS[now.getMonth()]+' '+now.getDate();
+  $('todayAff').textContent = affirmationFor(todayKey());
+  renderComing(); renderWeek(); renderEvents(); renderSettings(); renderClasses('classList'); renderLookPickers(); renderDates();
+}
+function renderComing(){
+  const t = todayKey();
+  const up = S.dates.filter(d => d.kind !== 'event' || /first day|begin|start|final/i.test(d.label))
+    .filter(d => d.start >= t && daysBetween(t, d.start) <= 60).sort((a,b)=>a.start.localeCompare(b.start)).slice(0,3);
+  $('coming').innerHTML = up.length ? '<span>Coming up:</span>' + up.map(d=>{ const n = daysBetween(t, d.start);
+    return `<span><b>${esc(d.label)}</b> · ${niceDate(d.start)} (${n===0?'today':n===1?'tomorrow':'in '+n+' days'})</span>`; }).join('') : '';
+}
+function renderWeek(){
+  $('range').textContent = $('range2').textContent = rangeText();
+  document.querySelectorAll('.prange').forEach(x=>x.textContent = rangeText());
+  $('startBanner').hidden = S.classes.length > 0 || S.events.length > 0;
+  $('legend').innerHTML = Object.entries(CAT_NAMES).map(([k,v])=>`<span><i class="c-${k}"></i>${v}</span>`).join('');
+  const days = weekDays(), today = todayKey(), {plans, goal, planned} = planWeek(days), wg = weeklyGoal();
+  const pct = goal ? Math.min(100, Math.round(planned/goal*100)) : 0;
+  $('studybar').innerHTML = `<span class="lbl">${hrs(planned)} of study planned this week</span>
+    <span class="meter" role="img" aria-label="${pct}% of study goal planned"><i style="width:${pct}%"></i></span>
+    <span class="sub">${wg.credits ? `Goal: ${hrs(goal)} (${wg.credits} credits × ${S.settings.hoursPerCredit} hrs)` : 'Goal: 1 hr a day. Add your courses and credits for a real goal.'}${planned + 45 <= goal ? ` · ${hrs(goal-planned)} short: a busy week, so grab extra time where you can` : ''}</span>`;
+  $('grid').innerHTML = days.map((k,i)=>{
+    const d = fromKey(k), p = plans[i];
+    const chips = datesOn(k).map(x=>`<div class="chip ${x.kind}">${x.kind==='deadline'?FLAG:ICON(12)}<span>${x.kind==='off'?'No classes · ':''}${esc(x.label)}</span></div>`).join('');
+    const sum = p.studied ? `${ICON(12)} ${hrs(p.studied)} of study` : 'no study today · rest up';
+    const note = S.notes[k];
+    return `<article class="day${k===today?' today':''}" id="d-${k}">
+      <div class="dhead"><h3 class="display">${DAYS[d.getDay()]}</h3><div class="date">${MONTHS[d.getMonth()]} ${d.getDate()}</div>
+      ${k===today?'<span class="today-tag">today</span>':''}
+      ${chips?`<div class="daychips">${chips}</div>`:''}
+      <div class="aff">${ICON()}${esc(affirmationFor(k))}</div></div>
+      <div class="dblocks">${p.blocks.map(b=>`<div class="blk c-${b.cat}${b.conflict?' conflict':''}"><div class="t">${b.sleep?fmt(b.s):fmtRange(b.s,b.e)}</div><div class="l">${esc(b.label)}</div>${b.note?`<div class="n">${esc(b.note)}</div>`:''}</div>`).join('')}</div>
+      <div class="daysum">${sum}</div>
+      <div class="dnotes">${note?`<img src="${note}" alt="Handwritten note for ${DAYS[d.getDay()]}">`:''}<div class="lines"></div>
+        <button class="notebtn" data-note="${k}">${PEN}${note?'Edit my note':'Write a note'}</button></div></article>`;
+  }).join('');
+}
+function renderEvents(){
+  const days = weekDays();
+  const evs = S.events.filter(e=>days.includes(e.date)).sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
+  $('evList').innerHTML = evs.length ? evs.map(e=>`<li class="c-${TYPE_CAT[e.type]||'fun'}"><span class="grow"><strong>${DOW_SHORT[fromKey(e.date).getDay()]} ${niceDate(e.date)}</strong> · ${fmtRange(toMin(e.start),toMin(e.end))}<br>${esc(e.label||TYPE_LABEL[e.type])}</span>
+      <button class="x" data-del="${e.id}" aria-label="Remove ${esc(e.label||'item')} on ${niceDate(e.date)}">×</button></li>`).join('')
+    : '<li style="color:var(--muted)">Nothing added for this week yet.</li>';
+}
+function renderSettings(){ const st = S.settings;
+  $('sName').value = st.name; $('sWake').value = st.wake; $('sBed').value = st.bedtime; $('sSleep').value = st.sleepHrs;
+  $('sReady').value = st.readyMins; $('sNight').value = st.nightMins; $('sCommute').value = st.commuteMins;
+  $('sWalk').value = st.walkMins; $('sHpc').value = String(st.hoursPerCredit); $('sMaxDay').value = st.maxStudyDay; $('sWalkDay').value = st.walkDay; }
+function renderClasses(target){
+  const order = [1,2,3,4,5,6,0];
+  $(target).innerHTML = S.classes.map(c=>`
+    <div class="classrow" data-cid="${c.id}">
+      <div class="row" style="grid-template-columns:1fr 110px auto">
+        <label class="f">Course name<input type="text" data-k="name" value="${esc(c.name||'')}" placeholder="e.g. Intro to Psychology"></label>
+        <label class="f">Credits<input type="number" class="credits" data-k="credits" min="0" max="12" step="0.5" value="${c.credits ?? ''}"></label>
+        <label class="f" style="justify-content:flex-end">&nbsp;<button class="x" style="background:var(--soft);width:44px;height:44px" data-delclass="${c.id}" aria-label="Remove course ${esc(c.name||'')}">×</button></label>
+      </div>
+      <div class="dow" role="group" aria-label="Class days" style="margin-bottom:10px">
+        ${order.map(d=>`<label><input type="checkbox" data-day="${d}" ${c.days.includes(d)?'checked':''} aria-label="${DAYS[d]}"><span>${DOW_SHORT[d]}</span></label>`).join('')}
+      </div>
+      <div class="row"><label class="f">Starts<input type="time" data-k="start" value="${c.start}"></label><label class="f">Ends<input type="time" data-k="end" value="${c.end}"></label></div>
+      <div class="row" style="margin-bottom:0"><label class="f">Term starts<input type="date" data-k="from" value="${c.from||''}"></label><label class="f">Term ends<input type="date" data-k="until" value="${c.until||''}"></label></div>
+    </div>`).join('') || '<p class="hint">No courses yet.</p>';
+}
+function lookCards(group, sel){
+  return Object.entries(LOOKS).map(([k,L])=>`<label class="lookopt"><input type="radio" name="${group}" value="${k}" ${k===sel?'checked':''}>
+    <span class="lookcard"><span class="nm" style="font-family:${L.font};${k==='slate'?'text-transform:uppercase;font-weight:700':''}${k==='sage'?'font-weight:600':''}">Aa</span>
+    <span class="chips">${L.chips.map(c=>`<i style="background:${c}"></i>`).join('')}</span><b>${L.label}</b><small>${L.blurb}</small></span></label>`).join('');
+}
+function swatches(group, sel){
+  return Object.entries(COLORS).map(([k,c])=>`<label class="swatch" title="${c.name}"><input type="radio" name="${group}" value="${k}" ${k===sel?'checked':''} aria-label="${c.name}"><span style="background:${c.a}"></span></label>`).join('');
+}
+function renderLookPickers(){ $('sLooks').innerHTML = lookCards('sLook', S.settings.look); $('sSwatches').innerHTML = swatches('sColor', S.settings.color); }
+function gcalLink(d){ const a = d.start.replace(/-/g,''), b = addDays(d.end||d.start,1).replace(/-/g,'');
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(d.label)+'&dates='+a+'/'+b; }
+function outlookLink(d){ return 'https://outlook.live.com/calendar/0/deeplink/compose?subject='+encodeURIComponent(d.label)+'&startdt='+d.start+'&enddt='+addDays(d.end||d.start,1)+'&allday=true&path=%2Fcalendar%2Faction%2Fcompose'; }
+function renderDates(){
+  const list = [...S.dates].sort((a,b)=>a.start.localeCompare(b.start));
+  $('dateList').innerHTML = list.length ? list.map(d=>`<li><span class="grow"><strong>${niceDate(d.start)}${d.end && d.end!==d.start?' – '+niceDate(d.end):''}</strong> · ${KIND_LABEL[d.kind]||'Date'}<br>${esc(d.label)}
+      ${d.kind==='deadline'?`<span class="links"><a href="${gcalLink(d)}" target="_blank" rel="noopener">Add to Google Calendar</a><a href="${outlookLink(d)}" target="_blank" rel="noopener">Add to Outlook</a></span>`:''}</span>
+      <button class="x" style="background:var(--soft)" data-deldate="${d.id}" aria-label="Remove ${esc(d.label)}">×</button></li>`).join('')
+    : '<li style="color:var(--muted)">No school dates yet. Snap your school calendar or add one below.</li>';
+}
+
+/* ---------- welcome ---------- */
+let W = {look:'bloom', color:'rose'};
+function renderWelcome(){ $('wLooks').innerHTML = lookCards('wLook', W.look); $('wSwatches').innerHTML = swatches('wColor', W.color); applyTheme(W.look, W.color); renderClasses('wClassList'); }
+function openWelcome(){
+  W = {look:S.settings.look, color:S.settings.color};
+  if(!S.classes.length) S.classes.push(newCourse());
+  $('wNameInput').value = S.settings.name; $('wWake').value = S.settings.wake; $('wReady').value = S.settings.readyMins;
+  $('wBed').value = S.settings.bedtime; $('wSleep').value = S.settings.sleepHrs;
+  renderWelcome(); $('welcome').hidden = false; setTimeout(()=>$('wNameInput').focus(), 50);
+}
+$('wNameInput').addEventListener('input', ()=>{ const v = $('wNameInput').value.trim(); $('wName').textContent = v ? v+"'s" : 'your'; });
+$('wLooks').addEventListener('change', e=>{ W.look = e.target.value; W.color = LOOKS[W.look].defaultColor; $('wLooks').innerHTML = lookCards('wLook', W.look); $('wSwatches').innerHTML = swatches('wColor', W.color); applyTheme(W.look, W.color); });
+$('wSwatches').addEventListener('change', e=>{ W.color = e.target.value; applyTheme(W.look, W.color); });
+$('wAddClass').onclick = ()=>{ S.classes.push(newCourse()); renderClasses('wClassList'); };
+function finishWelcome(tab){
+  const st = S.settings, num = (id, d) => { const n = parseFloat($(id).value); return isNaN(n) ? d : n; };
+  st.name = $('wNameInput').value.trim(); st.look = W.look; st.color = W.color;
+  st.wake = $('wWake').value || st.wake; st.bedtime = $('wBed').value || st.bedtime;
+  st.readyMins = num('wReady', st.readyMins); st.sleepHrs = num('wSleep', st.sleepHrs); st.onboarded = true;
+  S.classes = S.classes.filter(c => (c.name||'').trim() || c.days.length);
+  save(); $('welcome').hidden = true; showTab(tab); renderAll(); window.scrollTo(0,0);
+}
+$('wGo').onclick = ()=>finishWelcome('week');
+$('wGoSchool').onclick = ()=>finishWelcome('school');
+
+/* ---------- smart paste (shifts) ---------- */
+const DOW_RE = /\b(sun|mon|tue|tues|wed|thu|thur|thurs|fri|sat)(day|nesday|rsday|sday|urday)?\b\.?/i;
+const DOW_MAP = {sun:0,mon:1,tue:2,tues:2,wed:3,thu:4,thur:4,thurs:4,fri:5,sat:6};
+const DATE_RE = /\b(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\b/;
+const TIME_RE = /(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?|a|p)?\s*(?:-|–|—|to|until|til)\s*(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?|a|p)?(?![\d:])/i;
+function parseLines(text, type){
+  const days = weekDays(); let current = null; const added = [], skipped = [];
+  for(const raw of text.split(/\n+/)){
+    let line = raw.trim(); if(!line) continue; let date = null;
+    const dm = line.match(DATE_RE);
+    if(dm){ const mo = +dm[1], da = +dm[2]; let yr = dm[3] ? +dm[3] : fromKey(weekStart).getFullYear(); if(yr < 100) yr += 2000;
+      if(!dm[3] && new Date(yr,mo-1,da,12) - fromKey(weekStart) < -200*864e5) yr++;
+      const d = new Date(yr,mo-1,da,12); if(!isNaN(d)) date = keyOf(d); line = line.replace(dm[0],' '); }
+    const wm = line.match(DOW_RE);
+    if(wm){ if(!date){ const w = DOW_MAP[wm[1].toLowerCase()]; date = days.find(k=>fromKey(k).getDay()===w); } line = line.replace(wm[0],' '); }
+    const tm = line.match(TIME_RE);
+    if(!tm){ if(date) current = date; else if(/\d:\d\d|\d\s*(am|pm)\b/i.test(line)) skipped.push(raw.trim()); continue; }
+    if(!date) date = current; if(!date){ skipped.push(raw.trim()); continue; } current = date;
+    const ap = x => x ? (x[0].toLowerCase()==='p'?'pm':'am') : null;
+    let sh = +tm[1], sm = +(tm[2]||0), eh = +tm[4], em = +(tm[5]||0); const sa = ap(tm[3]), ea = ap(tm[6]);
+    const to24 = (h,a) => a==='pm' ? (h%12)+12 : a==='am' ? h%12 : null;
+    let e24 = to24(eh,ea), s24 = to24(sh,sa);
+    if(s24===null && e24!==null){ s24 = to24(sh,ea); if(s24*60+sm >= e24*60+em) s24 = to24(sh, ea==='pm'?'am':'pm'); }
+    if(s24===null) s24 = (sh>=7 && sh<=11) ? sh : (sh===12 ? 12 : sh+12);
+    if(e24===null){ e24 = eh===12 ? 12 : eh; while(e24*60+em <= s24*60+sm && e24 < 24) e24 += 12; if(e24 >= 24) e24 -= 12; }
+    if(s24 > 23 || e24 > 23 || sm > 59 || em > 59){ skipped.push(raw.trim()); continue; }
+    let label = line.replace(tm[0],' ').replace(/[|•·,;:()\-–—]+/g,' ').replace(/\s+/g,' ').trim();
+    if(/^(schedule|barista schedule)$/i.test(label)) label = '';
+    const ev = {id:uid(), date, start:toHHMM(s24*60+sm), end:toHHMM(e24*60+em), type, label: label || TYPE_LABEL[type]};
+    if(!S.events.some(x=>x.date===ev.date && x.start===ev.start && x.end===ev.end && x.type===ev.type)){ S.events.push(ev); added.push(ev); }
+  }
+  return {added, skipped};
+}
+
+/* ---------- school calendar reader ---------- */
+const MON = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,sept:8,oct:9,nov:10,dec:11};
+const MNAME = '(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sept?(?:ember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\\.?';
+const WD = '(?:(?:mon|tues?|wed(?:nes)?|thu(?:rs)?|fri|sat(?:ur)?|sun)(?:day)?\\.?,?\\s*)?';
+const SEP = '\\s*(?:-|–|—|to|through|thru)\\s*';
+const RE_WORD = new RegExp(WD + MNAME + '\\s+(\\d{1,2})(?:st|nd|rd|th)?(?:,?\\s*(\\d{4}))?(?:' + SEP + WD + '(?:' + MNAME + '\\s+)?(\\d{1,2})(?:st|nd|rd|th)?(?:,?\\s*(\\d{4}))?)?', 'i');
+const RE_NUM = new RegExp(WD + '(\\d{1,2})\\/(\\d{1,2})(?:\\/(\\d{2,4}))?(?:' + SEP + WD + '(?:(\\d{1,2})\\/)?(\\d{1,2})(?:\\/(\\d{2,4}))?)?', 'i');
+function guessYear(m, d, explicit){
+  if(explicit) return explicit < 100 ? 2000 + explicit : explicit;
+  const now = new Date(); let y = now.getFullYear();
+  if(new Date(y, m, d, 12) < new Date(now.getFullYear(), now.getMonth(), now.getDate() - 90)) y++;
+  return y;
+}
+function mk(y,m,d){ const x = new Date(y,m,d,12); return (x.getMonth()===m && d>=1) ? keyOf(x) : null; }
+function findDate(line){
+  let m = line.match(RE_WORD);
+  if(m){ const mo = MON[m[1].slice(0,3).toLowerCase()] ?? MON[m[1].slice(0,4).toLowerCase()]; const d1 = +m[2], y1 = guessYear(mo, d1, m[3] && +m[3]);
+    const start = mk(y1, mo, d1); let end = null;
+    if(m[5]){ const mo2 = m[4] ? MON[m[4].slice(0,3).toLowerCase()] : mo; let y2 = m[6] ? +m[6] : (mo2 < mo ? y1+1 : y1); end = mk(y2, mo2, +m[5]); }
+    return start ? {start, end: end && end > start ? end : null, text:m[0]} : null; }
+  m = line.match(RE_NUM);
+  if(m){ const mo = +m[1]-1, d1 = +m[2]; if(mo < 0 || mo > 11) return null; const y1 = guessYear(mo, d1, m[3] && +m[3]);
+    const start = mk(y1, mo, d1); let end = null;
+    if(m[5]){ const mo2 = m[4] ? +m[4]-1 : mo; let y2 = m[6] ? (+m[6] < 100 ? 2000 + +m[6] : +m[6]) : (mo2 < mo ? y1+1 : y1); end = mk(y2, mo2, +m[5]); }
+    return start ? {start, end: end && end > start ? end : null, text:m[0]} : null; }
+  return null;
+}
+function classify(label){
+  const t = label.toLowerCase();
+  if(/regist|enrol|appl(y|ication)|deadline|last day to|\bdrop\b|withdraw|tuition|payment|fees? due|financial aid|fafsa|petition|priority|waitlist|due\b/.test(t)) return 'deadline';
+  if(/no class|no school|holiday|closed|break\b|recess|observed|vacation|thanksgiving|labor day|veterans|memorial day|\bmlk\b|martin luther|juneteenth|independence|presidents|non-?instructional|in-?service|campus closure/.test(t)) return 'off';
+  return 'event';
+}
+function parseSchoolText(text){
+  const lines = text.split(/\n+/).map(l=>l.replace(/\s+/g,' ').trim()).filter(Boolean), out = [], dateOnly = [], labelOnly = [];
+  const clean = t => t.replace(/^[\s|:•·,;\-–—]+|[\s|:•·,;\-–—]+$/g,'').replace(/\s+/g,' ').trim();
+  let seenDate = false;
+  for(const line of lines){
+    const f = findDate(line);
+    if(f){ seenDate = true; const label = clean(line.replace(f.text,' '));
+      if(label.length >= 3 && /[a-z]{2}/i.test(label)) out.push({f, label}); else dateOnly.push(f); continue; }
+    // text with no date: a label from a separate column (ignore titles above the first date)
+    if(seenDate && /[a-z]{3}/i.test(line) && line.length >= 3) labelOnly.push(clean(line));
+  }
+  // table photos often come back as a column of dates, then a column of labels: pair them in order
+  dateOnly.forEach((f,i)=>{ if(labelOnly[i]) out.push({f, label:labelOnly[i]}); });
+  const items = out.map(({f,label})=>({id:uid(), start:f.start, end:f.end, kind:classify(label), label:label.charAt(0).toUpperCase()+label.slice(1), keep:true}))
+    .sort((x,y)=>x.start.localeCompare(y.start));
+  const seen = new Set(); return items.filter(x=>{ const k = x.start+x.label.toLowerCase(); if(seen.has(k)) return false; seen.add(k); return true; });
+}
+let found = [];
+function showReview(items){
+  found = items;
+  if(!items.length){ $('ocrMsg').textContent = "Couldn't find any dates. Try a closer, straight-on photo, or paste the text instead."; return; }
+  $('reviewRows').innerHTML = items.map((x,i)=>`<tr data-i="${i}">
+    <td><input type="checkbox" data-f="keep" ${x.keep?'checked':''} aria-label="Add ${esc(x.label)}"></td>
+    <td><input type="date" data-f="start" value="${x.start}" aria-label="Date"></td>
+    <td><input type="date" data-f="end" value="${x.end||''}" aria-label="End date (optional)"></td>
+    <td><select data-f="kind" aria-label="Type">${Object.entries(KIND_LABEL).map(([k,v])=>`<option value="${k}" ${k===x.kind?'selected':''}>${v}</option>`).join('')}</select></td>
+    <td><input type="text" data-f="label" value="${esc(x.label)}" aria-label="What"></td></tr>`).join('');
+  const first = items.find(x=>/first day|classes begin|instruction begins|term begins|quarter begins|semester begins/i.test(x.label));
+  const last = items.find(x=>/last day of (classes|instruction|term)|term ends|quarter ends|semester ends/i.test(x.label));
+  $('termOffer').innerHTML = (first || last) && S.classes.length ? `<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="useTerm" checked style="width:20px;height:20px"> Use ${first?niceDate(first.start):''}${first&&last?' – ':''}${last?niceDate(last.end||last.start):''} as the term dates for my courses</label>` : '';
+  $('termOffer').dataset.first = first ? first.start : ''; $('termOffer').dataset.last = last ? (last.end||last.start) : '';
+  $('reviewCard').hidden = false; $('ocrMsg').textContent = `Found ${items.length} date${items.length===1?'':'s'}. Check them below.`;
+  $('reviewCard').scrollIntoView({block:'start', behavior:'smooth'});
+}
+$('reviewRows').addEventListener('change', e=>{ const tr = e.target.closest('tr'); if(!tr) return; const x = found[+tr.dataset.i], f = e.target.dataset.f;
+  x[f] = f==='keep' ? e.target.checked : e.target.value; });
+$('reviewAdd').onclick = ()=>{
+  const keep = found.filter(x=>x.keep && x.start && x.label);
+  for(const x of keep){ if(!S.dates.some(d=>d.start===x.start && d.label.toLowerCase()===x.label.toLowerCase())) S.dates.push({id:uid(), start:x.start, end:x.end && x.end > x.start ? x.end : null, kind:x.kind, label:x.label}); }
+  if($('useTerm')?.checked){ const a = $('termOffer').dataset.first, b = $('termOffer').dataset.last; S.classes.forEach(c=>{ if(a) c.from = a; if(b) c.until = b; }); }
+  save(); $('reviewCard').hidden = true; found = []; renderAll(); showTab('school');
+  $('ocrMsg').textContent = `Added ${keep.length} school date${keep.length===1?'':'s'}.`;
+};
+$('reviewCard').hidden = true;
+$('reviewCancel').onclick = ()=>{ $('reviewCard').hidden = true; found = []; };
+$('calTextGo').onclick = ()=>showReview(parseSchoolText($('calText').value));
+
+let tessLoading = null;
+function loadTesseract(){
+  if(window.Tesseract) return Promise.resolve();
+  if(tessLoading) return tessLoading;
+  tessLoading = new Promise((res, rej)=>{ const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js'; s.onload = res; s.onerror = ()=>{ tessLoading = null; rej(); }; document.head.appendChild(s); });
+  return tessLoading;
+}
+$('calPhoto').onchange = async ev=>{
+  const f = ev.target.files[0]; ev.target.value = ''; if(!f) return;
+  $('ocrBar').hidden = false; $('ocrFill').style.width = '5%'; $('ocrMsg').textContent = 'Getting the reader ready…';
+  try{
+    await loadTesseract();
+    const r = await Tesseract.recognize(f, 'eng', {logger: m => { if(m.status === 'recognizing text'){ $('ocrFill').style.width = Math.round(10 + m.progress*90)+'%'; $('ocrMsg').textContent = 'Reading your calendar… '+Math.round(m.progress*100)+'%'; } }});
+    $('ocrBar').hidden = true; $('calText').value = r.data.text; showReview(parseSchoolText(r.data.text));
+  }catch(e){
+    $('ocrBar').hidden = true;
+    $('ocrMsg').textContent = "Couldn't read the photo. Photo reading needs an internet connection; you can also paste the calendar text below.";
+    document.querySelector('#school details').open = true;
+  }
+};
+$('dateList').addEventListener('click', e=>{ const id = e.target.closest('[data-deldate]')?.dataset.deldate; if(!id) return; S.dates = S.dates.filter(d=>d.id!==id); save(); renderAll(); });
+$('dAdd').onclick = ()=>{ const d = $('dDate').value, l = $('dLabel').value.trim(); if(!d || !l) return;
+  S.dates.push({id:uid(), start:d, end:null, kind:$('dKind').value, label:l}); $('dLabel').value = ''; save(); renderAll(); };
+
+/* ---------- Google / Outlook calendar files (.ics) ---------- */
+function icsDate(v, params){
+  const m = v.match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})?(Z)?)?/); if(!m) return null;
+  if(!m[4] || /VALUE=DATE(?!-)/i.test(params)) return {allDay:true, date:new Date(+m[1], +m[2]-1, +m[3], 12)};
+  const d = m[7] ? new Date(Date.UTC(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +(m[6]||0))) : new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +(m[6]||0));
+  return {allDay:false, date:d};
+}
+function parseICS(text){
+  const raw = text.replace(/\r\n/g,'\n').replace(/\n[ \t]/g,'').split('\n'), evs = []; let cur = null;
+  for(const line of raw){
+    if(line === 'BEGIN:VEVENT'){ cur = {exdates:[]}; continue; }
+    if(line === 'END:VEVENT'){ if(cur) evs.push(cur); cur = null; continue; }
+    if(!cur) continue;
+    const i = line.indexOf(':'); if(i < 0) continue;
+    const head = line.slice(0,i), val = line.slice(i+1), [name, ...ps] = head.split(';'), params = ps.join(';');
+    if(name === 'DTSTART') cur.start = icsDate(val, params);
+    else if(name === 'DTEND') cur.end = icsDate(val, params);
+    else if(name === 'SUMMARY') cur.summary = val.replace(/\\,/g,',').replace(/\\;/g,';').replace(/\\n/gi,' ');
+    else if(name === 'RRULE') cur.rrule = Object.fromEntries(val.split(';').map(p=>p.split('=')));
+    else if(name === 'EXDATE') val.split(',').forEach(v=>{ const d = icsDate(v, params); if(d) cur.exdates.push(keyOf(d.date)); });
+    else if(name === 'STATUS') cur.status = val;
+    else if(name === 'RECURRENCE-ID') cur.recurId = true;
+  }
+  return evs.filter(e=>e.start && e.status !== 'CANCELLED');
+}
+function expandICS(evs, fromK, toK){
+  const out = [], BYDAY = {SU:0,MO:1,TU:2,WE:3,TH:4,FR:5,SA:6};
+  for(const e of evs){
+    const s0 = e.start.date, dur = e.end ? e.end.date - s0 : (e.start.allDay ? 864e5 : 36e5);
+    const occ = [];
+    if(!e.rrule) occ.push(new Date(s0));
+    else {
+      const r = e.rrule, freq = r.FREQ, iv = +(r.INTERVAL||1), count = r.COUNT ? +r.COUNT : Infinity;
+      const until = r.UNTIL ? icsDate(r.UNTIL,'').date : null, days = r.BYDAY ? r.BYDAY.split(',').map(x=>BYDAY[x.slice(-2)]) : null;
+      let n = 0; const d = new Date(s0);
+      for(let step = 0; step < 3000 && n < count; step++){
+        if(until && d > until) break; if(keyOf(d) > toK) break;
+        let hit = true;
+        if(freq === 'WEEKLY' && days){ const wk = Math.floor((mondayIdx(d) - mondayIdx(s0)) / 7); hit = days.includes(d.getDay()) && wk % iv === 0 && d >= s0; }
+        if(hit){ occ.push(new Date(d)); n++; }
+        if(freq === 'DAILY') d.setDate(d.getDate() + iv);
+        else if(freq === 'WEEKLY') d.setDate(d.getDate() + (days ? 1 : 7*iv));
+        else if(freq === 'MONTHLY') d.setMonth(d.getMonth() + iv);
+        else if(freq === 'YEARLY') d.setFullYear(d.getFullYear() + iv);
+        else break;
+      }
+    }
+    for(const o of occ){ const k = keyOf(o); if(k < fromK || k > toK || e.exdates.includes(k)) continue;
+      out.push({allDay:e.start.allDay, start:o, end:new Date(o.getTime()+dur), label:e.summary || 'Calendar event'}); }
+  }
+  return out;
+}
+function mondayIdx(d){ const x = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12); x.setDate(x.getDate() - ((x.getDay()+6)%7)); return Math.round(x/864e5); }
+$('icsIn').onchange = ev=>{
+  const f = ev.target.files[0]; ev.target.value = ''; if(!f) return;
+  f.text().then(t=>{
+    const from = addDays(todayKey(), -7), to = addDays(todayKey(), 183);
+    const occ = expandICS(parseICS(t), from, to);
+    S.events = S.events.filter(e=>e.source !== 'ics'); S.dates = S.dates.filter(d=>d.source !== 'ics');
+    let timed = 0, allDay = 0;
+    for(const o of occ){
+      if(o.allDay){ const endK = addDays(keyOf(o.end), -1); S.dates.push({id:uid(), start:keyOf(o.start), end:endK > keyOf(o.start) ? endK : null, kind:'event', label:o.label, source:'ics'}); allDay++; }
+      else { const k = keyOf(o.start), s = o.start.getHours()*60 + o.start.getMinutes();
+        let e = keyOf(o.end) === k ? o.end.getHours()*60 + o.end.getMinutes() : 23*60+45; if(e <= s) e = Math.min(s+60, 23*60+45);
+        S.events.push({id:uid(), date:k, start:toHHMM(s), end:toHHMM(e), type:'cal', label:o.label, source:'ics'}); timed++; }
+    }
+    save(); renderAll();
+    $('icsMsg').textContent = occ.length ? `Loaded ${timed} event${timed===1?'':'s'} and ${allDay} all-day item${allDay===1?'':'s'} for the next 6 months. Load a fresh file any time to update.` : 'No upcoming events found in that file.';
+  }).catch(()=>{ $('icsMsg').textContent = "That file didn't open as a calendar. Pick the .ics file you exported."; });
+};
+const icsEsc = s => String(s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
+const icsLocal = (k, m) => k.replace(/-/g,'') + 'T' + toHHMM(m).replace(':','') + '00';
+if($('icsOut')) $('icsOut').onclick = ()=>{
+  const days = weekDays(), {plans} = planWeek(days), stamp = new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
+  const lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Waypoint Ink//Schedule Compass//EN','CALSCALE:GREGORIAN','X-WR-CALNAME:'+icsEsc((S.settings.name||'My')+"'s Week")];
+  days.forEach((k,i)=>plans[i].blocks.forEach((b,j)=>{
+    if(!['class','work','study','fun','appt'].includes(b.cat) || b.sleep) return;
+    lines.push('BEGIN:VEVENT','UID:ww-'+k+'-'+j+'-'+b.s+'@schedulecompass','DTSTAMP:'+stamp,'DTSTART:'+icsLocal(k,b.s),'DTEND:'+icsLocal(k,Math.min(b.e,1439)),'SUMMARY:'+icsEsc(b.label),'END:VEVENT');
+  }));
+  S.dates.filter(d=>d.source !== 'ics').forEach(d=>lines.push('BEGIN:VEVENT','UID:ww-date-'+d.id+'@schedulecompass','DTSTAMP:'+stamp,'DTSTART;VALUE=DATE:'+d.start.replace(/-/g,''),'DTEND;VALUE=DATE:'+addDays(d.end||d.start,1).replace(/-/g,''),'SUMMARY:'+icsEsc((d.kind==='off'?'No classes: ':'')+d.label),'END:VEVENT'));
+  lines.push('END:VCALENDAR');
+  const blob = new Blob([lines.join('\r\n')], {type:'text/calendar'}), a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'my-week-'+weekStart+'.ics'; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  $('icsMsg').textContent = 'Saved to your downloads. Now import it into Google Calendar or Outlook.';
+};
+
+/* ---------- wiring ---------- */
+const TABS = ['week','add','school','routine'];
+function showTab(n){ TABS.forEach(x=>{ $(x).classList.toggle('on', x===n); $('t-'+x).setAttribute('aria-selected', x===n); }); }
+TABS.forEach(n=>$('t-'+n).addEventListener('click',()=>showTab(n)));
+$('goAdd').onclick = $('bannerShifts').onclick = ()=>showTab('add');
+$('bannerClasses').onclick = ()=>{ if(!S.classes.length){ S.classes.push(newCourse()); save(); renderClasses('classList'); } showTab('routine'); $('classesCard').scrollIntoView({block:'start'}); };
+const shift = n => { weekStart = addDays(weekStart, 7*n); renderWeek(); renderEvents(); $('fDate').value = weekStart; };
+$('prev').onclick = $('prev2').onclick = ()=>shift(-1); $('next').onclick = $('next2').onclick = ()=>shift(1);
+$('thisWeek').onclick = ()=>{ weekStart = mondayOf(new Date()); renderWeek(); renderEvents(); };
+if($('print')) $('print').onclick = ()=>{ showTab('week'); openPrint(); };
+function openPrint(){
+  const o = S.printOpts;
+  document.querySelectorAll('input[name=pOrient]').forEach(r=>r.checked = r.value === o.orient);
+  $('pLines').checked = o.lines; $('pPage').checked = o.page; $('pInk').checked = o.ink; $('pCompact').checked = o.compact;
+  $('printPanel').hidden = false; $('printPanel').scrollIntoView({block:'nearest'});
+}
+$('cancelPrint').onclick = ()=>{ $('printPanel').hidden = true; };
+function renderNotesPage(){
+  const n = S.settings.name.trim(), boxes = weekDays().map(k=>{ const d = fromKey(k), img = S.notes[k];
+    return `<div class="nbx"><b>${DAYS[d.getDay()]} · ${niceDate(k)}</b><div class="ln">${img && S.printOpts.ink ? `<img src="${img}" alt="">` : ''}</div></div>`; });
+  boxes.push('<div class="nbx"><b>This week</b><div class="ln"></div></div>');
+  $('notesPage').innerHTML = `<h2 class="display">${esc(n ? n+"'s notes" : 'Notes')} · ${rangeText()}</h2><div class="notesgrid">${boxes.join('')}</div>`;
+}
+$('doPrint').onclick = ()=>{
+  const o = S.printOpts;
+  o.orient = document.querySelector('input[name=pOrient]:checked')?.value || 'landscape';
+  o.lines = $('pLines').checked; o.page = $('pPage').checked; o.ink = $('pInk').checked; o.compact = $('pCompact').checked; save();
+  const b = document.body, hasInk = o.ink && weekDays().some(k=>S.notes[k]);
+  b.classList.toggle('p-portrait', o.orient === 'portrait'); b.classList.toggle('p-lines', o.lines); b.classList.toggle('p-page', o.page);
+  b.classList.toggle('p-ink', o.ink); b.classList.toggle('p-compact', o.compact); b.classList.toggle('p-nonotes', !o.lines && !hasInk);
+  let st = $('pageSize'); if(!st){ st = document.createElement('style'); st.id = 'pageSize'; document.head.appendChild(st); }
+  st.textContent = `@page{size:letter ${o.orient};margin:0.35in}`;
+  renderNotesPage(); $('printPanel').hidden = true;
+  
+};
+
+/* ---------- handwriting pad ---------- */
+const NP = {key:null, color:'#2A2A2A', pen:'#2A2A2A', size:3, erase:false, drawing:false, undo:[], inked:false, last:null};
+const npCanvas = $('npCanvas'), npCtx = npCanvas.getContext('2d');
+function openNote(k){
+  NP.key = k; NP.undo = []; NP.inked = !!S.notes[k]; NP.drawing = false;
+  const d = fromKey(k); $('npTitle').textContent = 'Notes · '+DAYS[d.getDay()]+', '+niceDate(k); $('npMsg').textContent = '';
+  npCtx.clearRect(0,0,npCanvas.width,npCanvas.height);
+  if(S.notes[k]){ const img = new Image(); img.onload = ()=>npCtx.drawImage(img,0,0,npCanvas.width,npCanvas.height); img.src = S.notes[k]; }
+  $('npDelete').hidden = !S.notes[k];
+  $('notepad').hidden = false; $('npSave').focus();
+}
+function closeNote(){ $('notepad').hidden = true; const btn = document.querySelector(`[data-note="${NP.key}"]`); if(btn) btn.focus(); }
+$('grid').addEventListener('click', e=>{ const k = e.target.closest('[data-note]')?.dataset.note; if(k) openNote(k); });
+function npPos(e){ const r = npCanvas.getBoundingClientRect(); return {x:(e.clientX-r.left)*npCanvas.width/r.width, y:(e.clientY-r.top)*npCanvas.height/r.height}; }
+function npStyle(e){
+  npCtx.globalCompositeOperation = NP.erase ? 'destination-out' : 'source-over';
+  npCtx.strokeStyle = NP.pen === 'accent' ? getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() : NP.pen;
+  const pr = (e.pointerType === 'pen' && e.pressure > 0) ? (0.5 + e.pressure) : 1;
+  npCtx.lineWidth = (NP.erase ? 28 : NP.size * 2) * pr; npCtx.lineCap = 'round'; npCtx.lineJoin = 'round';
+}
+npCanvas.addEventListener('pointerdown', e=>{
+  e.preventDefault(); npCanvas.setPointerCapture(e.pointerId);
+  NP.undo.push(npCtx.getImageData(0,0,npCanvas.width,npCanvas.height)); if(NP.undo.length > 25) NP.undo.shift();
+  NP.drawing = true; NP.last = npPos(e); npStyle(e);
+  npCtx.beginPath(); npCtx.moveTo(NP.last.x, NP.last.y); npCtx.lineTo(NP.last.x+0.1, NP.last.y+0.1); npCtx.stroke();
+  if(!NP.erase) NP.inked = true;
+});
+npCanvas.addEventListener('pointermove', e=>{
+  if(!NP.drawing) return; e.preventDefault();
+  const pts = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+  for(const pe of (pts.length ? pts : [e])){ const p = npPos(pe); npStyle(pe);
+    npCtx.beginPath(); npCtx.moveTo(NP.last.x, NP.last.y); npCtx.lineTo(p.x, p.y); npCtx.stroke(); NP.last = p; }
+});
+['pointerup','pointercancel','pointerleave'].forEach(t=>npCanvas.addEventListener(t, ()=>{ NP.drawing = false; }));
+$('npTools').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  if(b.dataset.pen){ NP.pen = b.dataset.pen; NP.erase = false; $('npErase').setAttribute('aria-pressed','false');
+    document.querySelectorAll('#npTools [data-pen]').forEach(x=>x.setAttribute('aria-pressed', x===b)); }
+  else if(b.dataset.size){ NP.size = +b.dataset.size; document.querySelectorAll('#npTools [data-size]').forEach(x=>x.setAttribute('aria-pressed', x===b)); }
+  else if(b.id === 'npErase'){ NP.erase = !NP.erase; b.setAttribute('aria-pressed', NP.erase); }
+  else if(b.id === 'npUndo'){ const u = NP.undo.pop(); if(u) npCtx.putImageData(u,0,0); }
+  else if(b.id === 'npClear'){ NP.undo.push(npCtx.getImageData(0,0,npCanvas.width,npCanvas.height)); npCtx.clearRect(0,0,npCanvas.width,npCanvas.height); }
+});
+function canvasBlank(){ const d = npCtx.getImageData(0,0,npCanvas.width,npCanvas.height).data; for(let i=3;i<d.length;i+=16) if(d[i]) return false; return true; }
+$('npSave').onclick = ()=>{
+  const k = NP.key; if(!k) return;
+  if(canvasBlank()){ delete S.notes[k]; save(); renderWeek(); closeNote(); return; }
+  let url = npCanvas.toDataURL('image/webp', 0.8); if(!url.startsWith('data:image/webp')) url = npCanvas.toDataURL('image/png');
+  const prev = S.notes[k]; S.notes[k] = url;
+  if(!save()){ if(prev) S.notes[k] = prev; else delete S.notes[k];
+    $('npMsg').textContent = "There's no room left on this device for another note. Delete some older notes, then try again."; return; }
+  renderWeek(); closeNote();
+};
+$('npDelete').onclick = ()=>{ delete S.notes[NP.key]; save(); renderWeek(); closeNote(); };
+$('npCancel').onclick = $('npClose').onclick = closeNote;
+$('notepad').addEventListener('keydown', e=>{ if(e.key === 'Escape') closeNote(); });
+$('addPaste').onclick = ()=>{
+  const {added, skipped} = parseLines($('paste').value, $('pasteType').value); save(); renderWeek(); renderEvents();
+  let m = added.length ? `Added ${added.length} ${added.length===1?'thing':'things'}.` : 'Nothing new to add.';
+  if(skipped.length) m += ` Couldn't read: “${skipped.slice(0,3).join('”, “')}”${skipped.length>3?'…':''} (lines need a day and a time).`;
+  $('pasteMsg').textContent = m; if(added.length) $('paste').value = '';
+};
+$('addOne').onclick = ()=>{
+  const date = $('fDate').value, s = $('fStart').value, e = $('fEnd').value, type = $('fType').value;
+  if(!date || !s || !e){ $('oneMsg').textContent = 'Pick a date, a start time and an end time.'; return; }
+  S.events.push({id:uid(), date, start:s, end:e, type, label:$('fLabel').value.trim() || TYPE_LABEL[type]});
+  save(); weekStart = mondayOf(fromKey(date)); renderWeek(); renderEvents();
+  $('oneMsg').textContent = 'Added to '+DAYS[fromKey(date).getDay()]+', '+niceDate(date)+'.'; $('fLabel').value = '';
+};
+$('evList').addEventListener('click', ev=>{ const id = ev.target.closest('[data-del]')?.dataset.del; if(!id) return;
+  S.events = S.events.filter(e=>e.id!==id); save(); renderWeek(); renderEvents(); });
+const SET_MAP = {sName:['name','s'], sWake:['wake','s'], sBed:['bedtime','s'], sSleep:['sleepHrs','n'], sReady:['readyMins','n'], sNight:['nightMins','n'],
+  sCommute:['commuteMins','n'], sWalk:['walkMins','n'], sHpc:['hoursPerCredit','n'], sMaxDay:['maxStudyDay','n'], sWalkDay:['walkDay','s']};
+Object.entries(SET_MAP).forEach(([id,[k,t]])=>$(id).addEventListener('change',()=>{
+  const v = $(id).value; if(t==='n'){ const n = parseFloat(v); if(isNaN(n)) return; S.settings[k] = n; } else if(v!=='' || k==='name') S.settings[k] = v.trim();
+  save(); renderAll(); }));
+$('sLooks').addEventListener('change', e=>{ S.settings.look = e.target.value; S.settings.color = LOOKS[e.target.value].defaultColor; save(); renderAll(); });
+$('sSwatches').addEventListener('change', e=>{ S.settings.color = e.target.value; save(); renderAll(); });
+function classEdit(ev, rerender){
+  const row = ev.target.closest('[data-cid]'); if(!row) return;
+  const c = S.classes.find(x=>x.id===row.dataset.cid); if(!c) return;
+  if(ev.target.dataset.day!==undefined){ const d = +ev.target.dataset.day; c.days = ev.target.checked ? [...new Set([...c.days,d])] : c.days.filter(x=>x!==d); }
+  else if(ev.target.dataset.k) c[ev.target.dataset.k] = ev.target.dataset.k === 'credits' ? (parseFloat(ev.target.value)||0) : ev.target.value;
+  save(); if(rerender) renderWeek();
+}
+function classDelete(ev, target){ const id = ev.target.closest('[data-delclass]')?.dataset.delclass; if(!id) return;
+  S.classes = S.classes.filter(c=>c.id!==id); save(); renderClasses(target); if(target === 'classList') renderWeek(); }
+$('classList').addEventListener('change', ev=>classEdit(ev, true));
+$('classList').addEventListener('click', ev=>classDelete(ev, 'classList'));
+$('wClassList').addEventListener('change', ev=>classEdit(ev, false));
+$('wClassList').addEventListener('click', ev=>classDelete(ev, 'wClassList'));
+$('addClass').onclick = ()=>{ S.classes.push(newCourse()); save(); renderClasses('classList'); };
+if($('backup')) $('backup').onclick = ()=>{
+  const blob = new Blob([JSON.stringify(S,null,2)], {type:'application/json'}), a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = (S.settings.name||'my')+'-week-backup-'+todayKey()+'.json';
+  document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  $('safeMsg').textContent = 'Backup saved to your downloads.'; };
+$('restore').onchange = ev=>{ const f = ev.target.files[0]; if(!f) return;
+  f.text().then(t=>{ S = normalize(JSON.parse(t)); S.settings.onboarded = true; save(); renderAll(); $('safeMsg').textContent = 'Backup loaded.'; })
+   .catch(()=>{ $('safeMsg').textContent = "That file isn't a planner backup. Pick the .json file you saved."; }); ev.target.value = ''; };
+let armed = false;
+$('clearEv').onclick = ()=>{ if(!armed){ armed = true; $('clearEv').textContent = 'Tap again to clear everything'; setTimeout(()=>{ armed = false; $('clearEv').textContent = 'Clear all shifts & plans'; }, 4000); return; }
+  S.events = []; save(); renderAll(); armed = false; $('clearEv').textContent = 'Clear all shifts & plans'; $('safeMsg').textContent = 'All shifts and plans cleared.'; };
+
+load(); $('fDate').value = weekStart; $('dDate').value = todayKey(); renderAll();
+if(!S.settings.onboarded) openWelcome();
+else { const t = document.getElementById('d-'+todayKey()); if(t && window.innerWidth < 720) t.scrollIntoView({block:'start'}); }
+
+if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
