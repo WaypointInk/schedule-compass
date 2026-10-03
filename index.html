@@ -1407,11 +1407,31 @@ $('reviewCancel').onclick = ()=>{ $('reviewCard').hidden = true; found = []; };
 $('calTextGo').onclick = ()=>showReview(parseSchoolText($('calText').value));
 
 let tessLoading = null;
+// Inside the iPhone/iPad app the photo reader is bundled, so it works with no internet.
+const IS_NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+const TESS = IS_NATIVE
+  ? {src:'vendor/tesseract/tesseract.min.js', opts:{workerPath:'vendor/tesseract/worker.min.js', corePath:'vendor/tesseract/core', langPath:'vendor/tesseract/lang'}}
+  : {src:'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js', opts:{}};
+// Saves a text file: a download on the web, the share sheet (Save to Files, AirDrop, Mail…) in the iPhone app.
+function saveTextFile(fname, text, mime, msgEl, webMsg, appMsg){
+  const Pl = IS_NATIVE && window.Capacitor.Plugins;
+  if(Pl && Pl.Filesystem && Pl.Share){
+    Pl.Filesystem.writeFile({path:fname, data:text, directory:'CACHE', encoding:'utf8'})
+      .then(w=>Pl.Share.share({title:fname, url:w.uri}))
+      .then(()=>{ msgEl.textContent = appMsg; })
+      .catch(e=>{ if(!/cancel/i.test(String(e && e.message))) msgEl.textContent = "Couldn't save the file. Try again."; });
+    return;
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], {type:mime})); a.download = fname; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  msgEl.textContent = webMsg;
+}
 function loadTesseract(){
   if(window.Tesseract) return Promise.resolve();
   if(tessLoading) return tessLoading;
   tessLoading = new Promise((res, rej)=>{ const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js'; s.onload = res; s.onerror = ()=>{ tessLoading = null; rej(); }; document.head.appendChild(s); });
+    s.src = TESS.src; s.onload = res; s.onerror = ()=>{ tessLoading = null; rej(); }; document.head.appendChild(s); });
   return tessLoading;
 }
 $('calPhoto').onchange = async ev=>{
@@ -1419,7 +1439,7 @@ $('calPhoto').onchange = async ev=>{
   $('ocrBar').hidden = false; $('ocrFill').style.width = '5%'; $('ocrMsg').textContent = 'Getting the reader ready…';
   try{
     await loadTesseract();
-    const r = await Tesseract.recognize(f, 'eng', {logger: m => { if(m.status === 'recognizing text'){ $('ocrFill').style.width = Math.round(10 + m.progress*90)+'%'; $('ocrMsg').textContent = 'Reading your calendar… '+Math.round(m.progress*100)+'%'; } }});
+    const r = await Tesseract.recognize(f, 'eng', {...TESS.opts, logger: m => { if(m.status === 'recognizing text'){ $('ocrFill').style.width = Math.round(10 + m.progress*90)+'%'; $('ocrMsg').textContent = 'Reading your calendar… '+Math.round(m.progress*100)+'%'; } }});
     $('ocrBar').hidden = true; $('calText').value = r.data.text; showReview(parseSchoolText(r.data.text));
   }catch(e){
     $('ocrBar').hidden = true;
@@ -1512,10 +1532,8 @@ if($('icsOut')) $('icsOut').onclick = ()=>{
   }));
   S.dates.filter(d=>d.source !== 'ics').forEach(d=>lines.push('BEGIN:VEVENT','UID:ww-date-'+d.id+'@schedulecompass','DTSTAMP:'+stamp,'DTSTART;VALUE=DATE:'+d.start.replace(/-/g,''),'DTEND;VALUE=DATE:'+addDays(d.end||d.start,1).replace(/-/g,''),'SUMMARY:'+icsEsc((d.kind==='off'?'No classes: ':'')+d.label),'END:VEVENT'));
   lines.push('END:VCALENDAR');
-  const blob = new Blob([lines.join('\r\n')], {type:'text/calendar'}), a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = 'my-week-'+weekStart+'.ics'; document.body.appendChild(a); a.click();
-  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 500);
-  $('icsMsg').textContent = 'Saved to your downloads. Now import it into Google Calendar or Outlook.';
+  saveTextFile('my-week-'+weekStart+'.ics', lines.join('\r\n'), 'text/calendar', $('icsMsg'),
+    'Saved to your downloads. Now import it into Google Calendar or Outlook.', 'Now open it in Calendar, Google Calendar or Outlook.');
 };
 
 /* ---------- wiring ---------- */
@@ -1551,7 +1569,11 @@ $('doPrint').onclick = ()=>{
   let st = $('pageSize'); if(!st){ st = document.createElement('style'); st.id = 'pageSize'; document.head.appendChild(st); }
   st.textContent = `@page{size:letter ${o.orient};margin:0.35in}`;
   renderNotesPage(); $('printPanel').hidden = true;
-  
+  setTimeout(async ()=>{
+    const P = IS_NATIVE && window.Capacitor.Plugins && window.Capacitor.Plugins.Print;
+    if(P){ try{ await P.print({name:'Schedule Compass · '+rangeText()}); }catch(e){} return; }
+    try{ window.print(); }catch(e){}
+  }, 80);
 };
 
 /* ---------- handwriting pad ---------- */
@@ -1646,11 +1668,8 @@ $('classList').addEventListener('click', ev=>classDelete(ev, 'classList'));
 $('wClassList').addEventListener('change', ev=>classEdit(ev, false));
 $('wClassList').addEventListener('click', ev=>classDelete(ev, 'wClassList'));
 $('addClass').onclick = ()=>{ S.classes.push(newCourse()); save(); renderClasses('classList'); };
-if($('backup')) $('backup').onclick = ()=>{
-  const blob = new Blob([JSON.stringify(S,null,2)], {type:'application/json'}), a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = (S.settings.name||'my')+'-week-backup-'+todayKey()+'.json';
-  document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 500);
-  $('safeMsg').textContent = 'Backup saved to your downloads.'; };
+if($('backup')) $('backup').onclick = ()=>saveTextFile((S.settings.name||'my')+'-week-backup-'+todayKey()+'.json', JSON.stringify(S,null,2), 'application/json', $('safeMsg'),
+  'Backup saved to your downloads.', 'Backup saved.');
 $('restore').onchange = ev=>{ const f = ev.target.files[0]; if(!f) return;
   f.text().then(t=>{ S = normalize(JSON.parse(t)); S.settings.onboarded = true; save(); renderAll(); $('safeMsg').textContent = 'Backup loaded.'; })
    .catch(()=>{ $('safeMsg').textContent = "That file isn't a planner backup. Pick the .json file you saved."; }); ev.target.value = ''; };

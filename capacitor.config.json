@@ -1,0 +1,6 @@
+{
+  "appId": "com.waypointink.schedulecompass",
+  "appName": "Schedule Compass",
+  "webDir": "www",
+  "ios": { "contentInset": "never", "backgroundColor": "#FFF7F4" }
+}

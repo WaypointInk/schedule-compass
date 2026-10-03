@@ -10,8 +10,9 @@ Everything runs on the device. There are no accounts, servers or analytics.
 - `manifest.webmanifest`: app name, colors and icons, so it installs like an app
 - `sw.js`: offline support
 - `icon-*.png`: app icons in the sizes the Microsoft Store needs
-- `privacy.html`: privacy policy (link this in Partner Center)
+- `privacy.html`: privacy policy (link this in Partner Center and App Store Connect)
 - `support.html`: help page
+- `scripts/`, `ios-native/`, `mobile-assets/`, `.github/workflows/build-ios.yml`: the iPhone/iPad app build
 
 ## Publish to the Microsoft Store
 
@@ -20,6 +21,10 @@ Everything runs on the device. There are no accounts, servers or analytics.
 3. In Partner Center, open **Schedule Compass → Product management → Product identity**. Copy **Package/Identity/Name**, **Package/Identity/Publisher** and **Package/Properties/PublisherDisplayName** into the matching PWABuilder fields. Set the version to `1.0.0.0`.
 4. Download the package and upload the `.msixbundle` in the Partner Center submission under **Packages**.
 5. In the submission, use `https://<your-username>.github.io/schedule-compass/privacy.html` as the privacy policy URL and `.../support.html` as the support URL.
+
+## Publish to the App Store (iPhone and iPad)
+
+The iPhone app is built from these same files by GitHub, with the fonts and photo reader built in so it works offline. Follow [PUBLISHING.md](PUBLISHING.md), then run **Actions → Build iPhone app**.
 
 ## Updating the app
 

@@ -1,0 +1,35 @@
+{
+  "name": "schedule-compass",
+  "version": "1.0.0",
+  "description": "Schedule Compass — a weekly planner for college students.",
+  "author": "Waypoint Ink",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "www": "node scripts/build-www.js",
+    "ios:add": "npm run www && npx cap add ios && node scripts/install-ios.js && ruby scripts/ios-add-files.rb && npx cap sync ios",
+    "ios:open": "npx cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "^8.3.2",
+    "@capacitor/filesystem": "^8.0.0",
+    "@capacitor/ios": "^8.3.2",
+    "@capacitor/share": "^8.0.0",
+    "@fontsource/barlow": "^5.0.0",
+    "@fontsource/barlow-condensed": "^5.0.0",
+    "@fontsource/cormorant-garamond": "^5.0.0",
+    "@fontsource/figtree": "^5.0.0",
+    "@fontsource/fraunces": "^5.0.0",
+    "@fontsource/jost": "^5.0.0",
+    "@fontsource/parisienne": "^5.0.0",
+    "@tesseract.js-data/eng": "1.0.0",
+    "tesseract.js": "5.1.1",
+    "tesseract.js-core": "5.1.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.3.2"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
