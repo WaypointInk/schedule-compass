@@ -1,0 +1,98 @@
+# Builds the iPhone/iPad app on a GitHub Mac and sends it straight to App Store Connect (TestFlight).
+# No Mac needed. Run it from the "Actions" tab → "Build iPhone app" → "Run workflow".
+# Needs four repository secrets (see PUBLISHING.md):
+#   APPLE_TEAM_ID, APPSTORE_KEY_ID, APPSTORE_ISSUER_ID, APPSTORE_API_KEY (the text inside the .p8 file)
+name: Build iPhone app
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version people see (1.0.0, then 1.0.1 for a small update …)"
+        required: true
+        default: "1.0.0"
+
+jobs:
+  build:
+    runs-on: macos-latest
+    env:
+      APP_VERSION: ${{ inputs.version }}
+      BUILD_NUMBER: ${{ github.run_number }}.${{ github.run_attempt }}
+      TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+      ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+      API_KEY: ${{ secrets.APPSTORE_API_KEY }}
+    steps:
+      - name: Check the Apple secrets are there and in the right boxes
+        run: |
+          trim() { printf '%s' "$1" | tr -d '[:space:]'; }
+          TEAM_ID=$(trim "$TEAM_ID"); KEY_ID=$(trim "$KEY_ID"); ISSUER_ID=$(trim "$ISSUER_ID")
+          for v in TEAM_ID KEY_ID ISSUER_ID API_KEY; do
+            if [ -z "${!v}" ]; then echo "::error::Missing Apple secret for $v — see PUBLISHING.md."; exit 1; fi
+          done
+          bad=0
+          case "$KEY_ID" in *BEGIN*|*PRIVATE*) echo "::error::APPSTORE_KEY_ID holds the .p8 key text. Put the .p8 text in APPSTORE_API_KEY, and put only the 10-letter Key ID (like ABC123DEFG) in APPSTORE_KEY_ID."; bad=1;; esac
+          if [ $bad = 0 ] && ! printf '%s' "$KEY_ID" | grep -Eq '^[A-Z0-9]{10}$'; then echo "::error::APPSTORE_KEY_ID should be the 10-character Key ID shown next to the key in App Store Connect → Users and Access → Integrations (it is ${#KEY_ID} characters now)."; bad=1; fi
+          if ! printf '%s' "$TEAM_ID" | grep -Eq '^[A-Z0-9]{10}$'; then echo "::error::APPLE_TEAM_ID should be the 10-character Team ID from developer.apple.com → Membership details (it is ${#TEAM_ID} characters now)."; bad=1; fi
+          if ! printf '%s' "$ISSUER_ID" | grep -Eqi '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'; then echo "::error::APPSTORE_ISSUER_ID should be the Issuer ID shown above the keys list (looks like 69a6de70-03db-47e3-e053-5b8c7c11a4d1)."; bad=1; fi
+          if ! printf '%s' "$API_KEY" | grep -q 'BEGIN PRIVATE KEY'; then echo "::error::APPSTORE_API_KEY should be the whole text of the AuthKey_XXXXXXXXXX.p8 file, including the BEGIN and END lines."; bad=1; fi
+          [ $bad = 0 ] || exit 1
+          # Hand the cleaned-up values to the later steps
+          { echo "TEAM_ID=$TEAM_ID"; echo "KEY_ID=$KEY_ID"; echo "ISSUER_ID=$ISSUER_ID"; } >> "$GITHUB_ENV"
+          echo "Apple secrets look right."
+      - uses: actions/checkout@v4
+      - name: Use Xcode 26 (Apple requires it)
+        run: |
+          XC=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          if [ -z "$XC" ]; then echo "::error::No Xcode 26 on this machine. Change runs-on to macos-26."; exit 1; fi
+          sudo xcode-select -s "$XC/Contents/Developer"
+          xcodebuild -version
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install
+        run: npm install
+      - name: Build the app files with fonts and photo reader bundled for offline use
+        run: npm run www
+      - name: Create the iOS project
+        run: npx cap add ios
+      - name: Add print button, icon, launch screen and permissions
+        run: node scripts/install-ios.js
+      - name: Add native files to the Xcode target
+        run: |
+          ruby -e "require 'xcodeproj'" 2>/dev/null || sudo gem install xcodeproj --no-document
+          ruby scripts/ios-add-files.rb
+      - name: Copy the app in
+        run: npx cap sync ios
+      - name: Build the archive
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            MARKETING_VERSION="$APP_VERSION" CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
+            DEVELOPMENT_TEAM="$TEAM_ID" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
+            archive
+      - name: Sign with Apple's cloud signing and upload to App Store Connect
+        run: |
+          mkdir -p "$RUNNER_TEMP/keys"
+          KEY_PATH="$RUNNER_TEMP/keys/AuthKey_$KEY_ID.p8"
+          printf '%s\n' "$API_KEY" > "$KEY_PATH"
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>$TEAM_ID</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>uploadSymbols</key><true/>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+          </dict></plist>
+          PLIST
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" -exportPath "$RUNNER_TEMP/export" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$KEY_PATH" -authenticationKeyID "$KEY_ID" -authenticationKeyIssuerID "$ISSUER_ID"
+          echo "Uploaded version $APP_VERSION (build $BUILD_NUMBER). It shows up in App Store Connect → TestFlight in 10–30 minutes."
+      - name: Clean up the key
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/keys"

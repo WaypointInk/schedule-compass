@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1024" height="1024">
+  <!-- Schedule Compass app icon (full-bleed; iOS rounds the corners itself) -->
+  <rect width="512" height="512" fill="#2B4570"/>
+  <circle cx="256" cy="256" r="178" fill="none" stroke="#FFF7F0" stroke-width="14"/>
+  <g fill="#E6BE6E">
+    <circle cx="256" cy="108" r="11.5"/>
+    <circle cx="141" cy="163" r="11.5"/><circle cx="371" cy="163" r="11.5"/>
+    <circle cx="111.5" cy="289" r="11.5"/><circle cx="399.5" cy="289" r="11.5"/>
+    <circle cx="192" cy="387.5" r="11.5"/><circle cx="320" cy="387.5" r="11.5"/>
+  </g>
+  <polygon points="256,141.5 225,256 287,256" fill="#D66E8C"/>
+  <polygon points="225,256 287,256 256,370" fill="#FFF7F0"/>
+  <circle cx="256" cy="256" r="13" fill="#2B4570"/>
+</svg>
