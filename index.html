@@ -332,11 +332,14 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     </div>
     <div class="step">
       <h3 class="display"><span>Step 6 · optional</span>Your school calendar</h3>
-      <p class="hint" style="margin:0">Snap a photo of your school's academic calendar and your planner will mark days off, registration deadlines and term dates. You can do this now or later.</p>
+      <p class="hint" style="margin:0">Snap a photo of your school's academic calendar and your planner will mark days off, registration deadlines and term dates. Or load a calendar file (.ics) from Google or Outlook. You can do this now or later.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+        <label class="btn" style="display:inline-flex;align-items:center;cursor:pointer;position:relative">Take or choose a photo<input type="file" id="wCalPhoto" accept="image/*" style="position:absolute;opacity:0;width:1px;height:1px"></label>
+        <label class="btn" style="display:inline-flex;align-items:center;cursor:pointer;position:relative">Load a calendar file (.ics)<input type="file" id="wIcs" accept=".ics,text/calendar" style="position:absolute;opacity:0;width:1px;height:1px"></label>
+      </div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn primary" id="wGo" style="padding:12px 28px;font-size:17px">Build my planner</button>
-      <button class="btn" id="wGoSchool" style="padding:12px 22px;font-size:17px">Build it &amp; add my school calendar</button>
     </div>
   </div>
 </div>
@@ -413,6 +416,12 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       <button class="btn primary" id="bannerClasses">Add my classes</button>
       <button class="btn" id="bannerShifts">Add shifts</button>
     </div>
+    <div class="banner" id="calBanner" hidden>
+      <p><strong>Add your school calendar.</strong> Days off, deadlines and term dates show up right in your week.</p>
+      <label class="btn primary" style="display:inline-flex;align-items:center;cursor:pointer;position:relative">Snap a photo<input type="file" id="bCalPhoto" accept="image/*" style="position:absolute;opacity:0;width:1px;height:1px"></label>
+      <label class="btn" style="display:inline-flex;align-items:center;cursor:pointer;position:relative">Load a calendar file<input type="file" id="bIcs" accept=".ics,text/calendar" style="position:absolute;opacity:0;width:1px;height:1px"></label>
+      <button class="btn" id="calBannerOff" style="background:transparent;border-color:transparent">Not now</button>
+    </div>
     <div class="studybar" id="studybar"></div>
     <div class="legend" id="legend"></div>
     <div class="week" id="grid"></div>
@@ -469,9 +478,9 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 
   <section class="panel" id="school" role="tabpanel" aria-labelledby="t-school">
     <div class="cards">
-      <div class="card">
+      <div class="card" id="photoCard">
         <h2 class="display">Snap your school calendar</h2>
-        <p class="hint">Take a photo or screenshot of your school's academic calendar. The planner reads it and finds days off, registration and application deadlines, and term dates. You check everything before it's added. Reading a photo needs an internet connection the first time.</p>
+        <p class="hint">Take a photo or screenshot of your school's academic calendar. The planner reads it and finds days off, registration and application deadlines, and term dates. You check everything before it's added.<span class="web-only"> Reading a photo needs an internet connection the first time.</span></p>
         <label class="btn primary" style="display:inline-flex;align-items:center;cursor:pointer;position:relative">Take or choose a photo<input type="file" id="calPhoto" accept="image/*" style="position:absolute;opacity:0;width:1px;height:1px"></label>
         <div class="progress" id="ocrBar" hidden><i id="ocrFill"></i></div>
         <div class="msg" id="ocrMsg" role="status"></div>
@@ -500,7 +509,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
         <label class="f" style="margin-bottom:10px">What<input type="text" id="dLabel" placeholder="Winter registration opens"></label>
         <button class="btn" id="dAdd">+ Add a date</button>
       </div>
-      <div class="card">
+      <div class="card" id="icsCard">
         <h2 class="display">Google &amp; Outlook calendars</h2>
         <p class="hint"><strong>Bring your calendar in:</strong> export it as a calendar file (.ics) and load it here. Your events show up in your week and the planner works around them.</p>
         <details class="hint"><summary style="cursor:pointer;color:var(--accent-deep);min-height:32px">How to get the file</summary>
@@ -1199,6 +1208,7 @@ function renderWeek(){
   $('range').textContent = $('range2').textContent = rangeText();
   document.querySelectorAll('.prange').forEach(x=>x.textContent = rangeText());
   $('startBanner').hidden = S.classes.length > 0 || S.events.length > 0;
+  $('calBanner').hidden = !$('startBanner').hidden || S.dates.length > 0 || S.events.some(e => e.source === 'ics') || !!S.settings.calBannerOff;
   $('legend').innerHTML = Object.entries(CAT_NAMES).map(([k,v])=>`<span><i class="c-${k}"></i>${v}</span>`).join('');
   const days = weekDays(), today = todayKey(), {plans, goal, planned} = planWeek(days), wg = weeklyGoal();
   const pct = goal ? Math.min(100, Math.round(planned/goal*100)) : 0;
@@ -1291,7 +1301,6 @@ function finishWelcome(tab){
   save(); $('welcome').hidden = true; showTab(tab); renderAll(); window.scrollTo(0,0);
 }
 $('wGo').onclick = ()=>finishWelcome('week');
-$('wGoSchool').onclick = ()=>finishWelcome('school');
 
 /* ---------- smart paste (shifts) ---------- */
 const DOW_RE = /\b(sun|mon|tue|tues|wed|thu|thur|thurs|fri|sat)(day|nesday|rsday|sday|urday)?\b\.?/i;
@@ -1435,8 +1444,7 @@ function loadTesseract(){
     s.src = TESS.src; s.onload = res; s.onerror = ()=>{ tessLoading = null; rej(); }; document.head.appendChild(s); });
   return tessLoading;
 }
-$('calPhoto').onchange = async ev=>{
-  const f = ev.target.files[0]; ev.target.value = ''; if(!f) return;
+async function readCalPhoto(f){
   $('ocrBar').hidden = false; $('ocrFill').style.width = '5%'; $('ocrMsg').textContent = 'Getting the reader ready…';
   try{
     await loadTesseract();
@@ -1444,10 +1452,10 @@ $('calPhoto').onchange = async ev=>{
     $('ocrBar').hidden = true; $('calText').value = r.data.text; showReview(parseSchoolText(r.data.text));
   }catch(e){
     $('ocrBar').hidden = true;
-    $('ocrMsg').textContent = "Couldn't read the photo. Photo reading needs an internet connection; you can also paste the calendar text below.";
+    $('ocrMsg').textContent = IS_NATIVE ? "Couldn't read that photo. Try a clearer, straight-on photo or screenshot, or paste the calendar text below." : "Couldn't read the photo. Photo reading needs an internet connection; you can also paste the calendar text below.";
     document.querySelector('#school details').open = true;
   }
-};
+}
 $('dateList').addEventListener('click', e=>{ const id = e.target.closest('[data-deldate]')?.dataset.deldate; if(!id) return; S.dates = S.dates.filter(d=>d.id!==id); save(); renderAll(); });
 $('dAdd').onclick = ()=>{ const d = $('dDate').value, l = $('dLabel').value.trim(); if(!d || !l) return;
   S.dates.push({id:uid(), start:d, end:null, kind:$('dKind').value, label:l}); $('dLabel').value = ''; save(); renderAll(); };
@@ -1505,9 +1513,8 @@ function expandICS(evs, fromK, toK){
   return out;
 }
 function mondayIdx(d){ const x = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12); x.setDate(x.getDate() - ((x.getDay()+6)%7)); return Math.round(x/864e5); }
-$('icsIn').onchange = ev=>{
-  const f = ev.target.files[0]; ev.target.value = ''; if(!f) return;
-  f.text().then(t=>{
+function readIcs(f){
+  return f.text().then(t=>{
     const from = addDays(todayKey(), -7), to = addDays(todayKey(), 183);
     const occ = expandICS(parseICS(t), from, to);
     S.events = S.events.filter(e=>e.source !== 'ics'); S.dates = S.dates.filter(d=>d.source !== 'ics');
@@ -1521,7 +1528,17 @@ $('icsIn').onchange = ev=>{
     save(); renderAll();
     $('icsMsg').textContent = occ.length ? `Loaded ${timed} event${timed===1?'':'s'} and ${allDay} all-day item${allDay===1?'':'s'} for the next 6 months. Load a fresh file any time to update.` : 'No upcoming events found in that file.';
   }).catch(()=>{ $('icsMsg').textContent = "That file didn't open as a calendar. Pick the .ics file you exported."; });
-};
+}
+// Every photo / calendar-file button (setup, My week reminder, School tab) opens the School tab at the right card and reads the file there.
+function fileButton(id, reader, card, before){
+  $(id).onchange = ev=>{ const f = ev.target.files[0]; ev.target.value = ''; if(!f) return;
+    if(before) before();
+    showTab('school'); $(card).scrollIntoView({block:'start'}); reader(f); };
+}
+fileButton('calPhoto', readCalPhoto, 'photoCard'); fileButton('icsIn', readIcs, 'icsCard');
+fileButton('bCalPhoto', readCalPhoto, 'photoCard'); fileButton('bIcs', readIcs, 'icsCard');
+fileButton('wCalPhoto', readCalPhoto, 'photoCard', ()=>finishWelcome('school')); fileButton('wIcs', readIcs, 'icsCard', ()=>finishWelcome('school'));
+$('calBannerOff').onclick = ()=>{ S.settings.calBannerOff = true; save(); renderAll(); };
 const icsEsc = s => String(s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
 const icsLocal = (k, m) => k.replace(/-/g,'') + 'T' + toHHMM(m).replace(':','') + '00';
 if($('icsOut')) $('icsOut').onclick = ()=>{
@@ -1682,6 +1699,7 @@ load(); $('fDate').value = weekStart; $('dDate').value = todayKey(); renderAll()
 if(!S.settings.onboarded) openWelcome();
 else { const t = document.getElementById('d-'+todayKey()); if(t && window.innerWidth < 720) t.scrollIntoView({block:'start'}); }
 
+if(IS_NATIVE) document.querySelectorAll('.web-only').forEach(e => e.remove());
 if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
