@@ -114,6 +114,8 @@ button,input,select,textarea{font:inherit;color:inherit}
 .c-study{background:var(--study-bg);color:var(--study-fg)} .c-fun{background:var(--fun-bg);color:var(--fun-fg)}
 .c-appt{background:var(--appt-bg);color:var(--appt-fg)} .c-routine{background:var(--routine-bg);color:var(--routine-fg)}
 .c-meal{background:var(--meal-bg);color:var(--meal-fg);border:1.5px dashed var(--meal-line)}
+.c-drive{background:var(--routine-bg);color:var(--routine-fg);border-left:4px dotted currentColor}
+.blk .w{font-size:12.5px;margin-top:2px}.blk .w a{color:inherit;text-decoration:underline;text-underline-offset:2px}
 .dhead,.dblocks,.dnotes{display:flex;flex-direction:column;gap:6px}
 .daysum{margin-top:auto;padding-top:4px;text-align:center;font-size:12px;color:var(--muted)}
 .dnotes img{display:block;width:100%;border:1.5px solid var(--line);border-radius:var(--blk-radius);background:#fff repeating-linear-gradient(to bottom,transparent 0 17px,var(--line) 17px 18px)}
@@ -480,7 +482,11 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
           <label class="f">Starts<input type="time" id="fStart" value="09:00"></label>
           <label class="f">Ends<input type="time" id="fEnd" value="13:00"></label>
         </div>
-        <label class="f" style="margin-bottom:12px">Name (optional)<input type="text" id="fLabel" placeholder="Work shift"></label>
+        <label class="f">Name (optional)<input type="text" id="fLabel" placeholder="Work shift"></label>
+        <div class="row" style="margin-bottom:12px">
+          <label class="f">Where (optional)<input type="text" id="fWhere" placeholder="e.g. 210 Main St"></label>
+          <label class="f">Drive time (min)<input type="number" id="fDrive" min="0" max="240" step="5" placeholder="none"></label>
+        </div>
         <button class="btn primary" id="addOne">Add it</button>
         <div class="msg" id="oneMsg" role="status"></div>
       </div>
@@ -554,7 +560,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
         <div class="row"><label class="f">My name<input type="text" id="sName"></label><label class="f">Usual wake-up<input type="time" id="sWake"></label></div>
         <div class="row"><label class="f">Latest bedtime<input type="time" id="sBed"></label><label class="f">Sleep goal (hours)<input type="number" id="sSleep" min="6" max="11" step="0.5"></label></div>
         <div class="row"><label class="f">Getting ready (min)<input type="number" id="sReady" min="15" max="180" step="15"></label><label class="f">Night routine (min)<input type="number" id="sNight" min="0" max="120" step="15"></label></div>
-        <div class="row"><label class="f">Travel time (min)<input type="number" id="sCommute" min="0" max="120" step="5"></label><label class="f">Walk / outdoor time (min)<input type="number" id="sWalk" min="30" max="240" step="15"></label></div>
+        <div class="row"><label class="f">Usual travel time (min)<input type="number" id="sCommute" min="0" max="120" step="5"></label><label class="f">Walk / outdoor time (min)<input type="number" id="sWalk" min="30" max="240" step="15"></label></div>
         <div class="row"><label class="f">Study hours per credit, each week
           <select id="sHpc"><option value="1">1 hour</option><option value="1.5">1.5 hours</option><option value="2">2 hours (recommended)</option><option value="2.5">2.5 hours</option><option value="3">3 hours</option></select></label>
           <label class="f">Most study in one day (hours)<input type="number" id="sMaxDay" min="1" max="8" step="0.5"></label></div>
@@ -1006,7 +1012,7 @@ const COLORS = {
   gold:{name:'Gold', a:'#86651C', d:'#6B5016', s:'#F8F2E3', l:'#E6D6AE'},
   charcoal:{name:'Charcoal', a:'#3F4650', d:'#2A2F36', s:'#EFF0F2', l:'#CDD1D6'},
 };
-const CAT_NAMES = {class:'Class', work:'Work', study:'Study', fun:'Walks & fun', appt:'Appointments & calendar', routine:'Routine & sleep', meal:'Meals & free time'};
+const CAT_NAMES = {class:'Class', work:'Work', study:'Study', fun:'Walks & fun', appt:'Appointments & calendar', drive:'Driving', routine:'Routine & sleep', meal:'Meals & free time'};
 const TYPE_CAT = {work:'work', event:'fun', appt:'appt', class:'class', cal:'appt'};
 const TYPE_LABEL = {work:'Work shift', event:'Plans', appt:'Appointment', class:'Class', cal:'Calendar event'};
 const KIND_LABEL = {off:'Day off', deadline:'Deadline', event:'School event'};
@@ -1073,17 +1079,39 @@ function fixedFor(k){
   if(!off) for(const c of S.classes){
     if(!c.days || !c.days.includes(dow)) continue;
     if(c.from && k < c.from) continue; if(c.until && k > c.until) continue;
-    out.push({s:toMin(c.start), e:toMin(c.end), cat:'class', label:c.name||'Class'});
+    out.push({s:toMin(c.start), e:toMin(c.end), cat:'class', label:c.name||'Class', where:(c.where||'').trim(), drive:c.drive ?? null});
   }
   for(const ev of S.events){
     if(ev.date !== k) continue;
     let s = toMin(ev.start), e = toMin(ev.end); if(e <= s) e += 1440;
-    out.push({s, e, cat:TYPE_CAT[ev.type]||'fun', label:ev.label||TYPE_LABEL[ev.type]||'Plans'});
+    out.push({s, e, cat:TYPE_CAT[ev.type]||'fun', label:ev.label||TYPE_LABEL[ev.type]||'Plans', where:(ev.where||'').trim(), drive:ev.drive ?? null});
   }
   return out.sort((a,b)=>a.s-b.s);
 }
 function wakeFor(k){ const st = S.settings, f = fixedFor(k).filter(b=>b.s >= 4*60), dw = toMin(st.wake); if(!f.length) return dw;
-  return Math.max(240, Math.min(dw, dn15(f[0].s - st.commuteMins - st.readyMins))); }
+  return Math.max(240, Math.min(dw, dn15(f[0].s - leadFor(f[0]) - st.readyMins))); }
+// Minutes to keep free before something: its own drive time when set, otherwise the general travel time.
+const leadFor = b => b.drive != null ? b.drive : S.settings.commuteMins;
+const driveVal = v => { const n = parseInt(v, 10); return isNaN(n) ? null : Math.max(0, Math.min(240, n)); };
+const samePlace = (a, b) => !!(a.where && b.where && a.where.toLowerCase() === b.where.toLowerCase());
+// "Drive to …" before things with a drive time, and "Drive home" after the last one in a run.
+// Back-to-back things at the same place need no drive between them; a different place nearby gets a drive straight there.
+function travelBlocks(fixed){
+  const out = [];
+  fixed.forEach((b, i) => {
+    if(!(b.drive > 0)) return;
+    const prev = fixed.slice(0, i).reverse().find(x => x.e <= b.s);
+    const near = prev && b.s - prev.e < (prev.drive || 0) + b.drive + 60;
+    if(!(near && samePlace(prev, b))){
+      const s = near ? Math.max(b.s - b.drive, prev.e) : b.s - b.drive;
+      if(b.s - s >= 5) out.push({s, e:b.s, cat:'drive', label:'Drive to '+(b.where || b.label)+' · '+hrs(b.s - s), where:b.where, dir:true});
+    }
+    const next = fixed.slice(i + 1).find(x => x.s >= b.e);
+    const goingOn = next && next.s - b.e < b.drive + (next.drive || 0) + 60 && (next.drive > 0 || samePlace(b, next));
+    if(!goingOn) out.push({s:b.e, e:b.e + b.drive, cat:'drive', label:'Drive home · '+hrs(b.drive)});
+  });
+  return out;
+}
 function bedFor(k){ const st = S.settings; let latest = toMin(st.bedtime); if(latest < 12*60) latest += 1440;
   return dn15(Math.min(latest, wakeFor(addDays(k,1)) + 1440 - st.sleepHrs*60)); }
 function subtract(gaps,s,e){ const o = []; for(const [a,b] of gaps){ if(e<=a||s>=b){o.push([a,b]);continue;} if(s>a) o.push([a,s]); if(e<b) o.push([e,b]); } return o.filter(([a,b])=>b>a); }
@@ -1125,10 +1153,12 @@ function planDay(k, isWalkDay, target, q){
   for(let i=0;i<fixed.length;i++) for(let j=i+1;j<fixed.length;j++) if(fixed[i].e > fixed[j].s) fixed[i].conflict = fixed[j].conflict = true;
   blocks.push({s:wake, e:readyEnd, cat:'routine', label:L.ready});
   fixed.forEach(b=>{ if(b.conflict) b.note = 'Overlaps something. Check!'; blocks.push(b); });
+  const travel = travelBlocks(fixed); travel.forEach(t => blocks.push(t));
   // BUF = breathing room between planned items, so one never ends at the minute the next begins
   const BUF = 15;
   let gaps = [[readyEnd + BUF, nightStart - BUF]];
-  for(const b of fixed) gaps = subtract(gaps, b.s - Math.max(st.commuteMins, BUF), b.e + BUF);
+  for(const b of fixed) gaps = subtract(gaps, b.s - (b.drive != null ? BUF : Math.max(st.commuteMins, BUF)), b.e + BUF);
+  for(const t of travel) gaps = subtract(gaps, t.s - BUF, t.e + BUF);
   const place = (s,e,cat,label,note) => { blocks.push({s,e,cat,label,note}); gaps = subtract(gaps, s - BUF, e + BUF); };
   const g0 = gaps.find(g=>g[0]===readyEnd + BUF);
   if(g0 && g0[1]-g0[0] >= 45) place(readyEnd + BUF, readyEnd + BUF + 30, 'meal', 'Breakfast');
@@ -1220,6 +1250,10 @@ function renderComing(){
   $('coming').innerHTML = up.length ? '<span>Coming up:</span>' + up.map(d=>{ const n = daysBetween(t, d.start);
     return `<span><b>${esc(d.label)}</b> · ${niceDate(d.start)} (${n===0?'today':n===1?'tomorrow':'in '+n+' days'})</span>`; }).join('') : '';
 }
+// Apple Maps on iPhone, iPad and Mac; Google Maps everywhere else.
+const mapsUrl = (where, directions) => /iPhone|iPad|Macintosh/.test(navigator.userAgent)
+  ? 'https://maps.apple.com/?' + (directions ? 'daddr=' : 'q=') + encodeURIComponent(where)
+  : 'https://www.google.com/maps/' + (directions ? 'dir/?api=1&destination=' : 'search/?api=1&query=') + encodeURIComponent(where);
 function renderWeek(){
   $('range').textContent = $('range2').textContent = rangeText();
   document.querySelectorAll('.prange').forEach(x=>x.textContent = rangeText());
@@ -1241,7 +1275,7 @@ function renderWeek(){
       ${k===today?'<span class="today-tag">today</span>':''}
       ${chips?`<div class="daychips">${chips}</div>`:''}
       <div class="aff">${ICON()}${esc(affirmationFor(k))}</div></div>
-      <div class="dblocks">${p.blocks.map(b=>`<div class="blk c-${b.cat}${b.conflict?' conflict':''}"><div class="t">${b.sleep?fmt(b.s):fmtRange(b.s,b.e)}</div><div class="l">${esc(b.label)}</div>${b.note?`<div class="n">${esc(b.note)}</div>`:''}</div>`).join('')}</div>
+      <div class="dblocks">${p.blocks.map(b=>`<div class="blk c-${b.cat}${b.conflict?' conflict':''}"><div class="t">${b.sleep?fmt(b.s):fmtRange(b.s,b.e)}</div><div class="l">${esc(b.label)}</div>${b.where && b.cat !== 'drive' ? `<div class="w">📍 <a href="${mapsUrl(b.where)}" target="_blank" rel="noopener">${esc(b.where)}</a></div>` : ''}${b.dir && b.where ? `<div class="w"><a href="${mapsUrl(b.where, true)}" target="_blank" rel="noopener">Directions</a></div>` : ''}${b.note?`<div class="n">${esc(b.note)}</div>`:''}</div>`).join('')}</div>
       <div class="daysum">${sum}</div>
       <div class="dnotes">${note?`<img src="${note}" alt="Handwritten note for ${DAYS[d.getDay()]}">`:''}<div class="lines"></div>
         <button class="notebtn" data-note="${k}">${PEN}${note?'Edit my note':'Write a note'}</button></div></article>`;
@@ -1250,7 +1284,7 @@ function renderWeek(){
 function renderEvents(){
   const days = weekDays();
   const evs = S.events.filter(e=>days.includes(e.date)).sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
-  $('evList').innerHTML = evs.length ? evs.map(e=>`<li class="c-${TYPE_CAT[e.type]||'fun'}"><span class="grow"><strong>${DOW_SHORT[fromKey(e.date).getDay()]} ${niceDate(e.date)}</strong> · ${fmtRange(toMin(e.start),toMin(e.end))}<br>${esc(e.label||TYPE_LABEL[e.type])}</span>
+  $('evList').innerHTML = evs.length ? evs.map(e=>`<li class="c-${TYPE_CAT[e.type]||'fun'}"><span class="grow"><strong>${DOW_SHORT[fromKey(e.date).getDay()]} ${niceDate(e.date)}</strong> · ${fmtRange(toMin(e.start),toMin(e.end))}<br>${esc(e.label||TYPE_LABEL[e.type])}${e.where ? ' · '+esc(e.where) : ''}${e.drive ? ' · '+hrs(e.drive)+' drive' : ''}</span>
       <button class="x" data-del="${e.id}" aria-label="Remove ${esc(e.label||'item')} on ${niceDate(e.date)}">×</button></li>`).join('')
     : '<li style="color:var(--muted)">Nothing added for this week yet.</li>';
 }
@@ -1271,6 +1305,7 @@ function renderClasses(target){
         ${order.map(d=>`<label><input type="checkbox" data-day="${d}" ${c.days.includes(d)?'checked':''} aria-label="${DAYS[d]}"><span>${DOW_SHORT[d]}</span></label>`).join('')}
       </div>
       <div class="row"><label class="f">Starts<input type="time" data-k="start" value="${c.start}"></label><label class="f">Ends<input type="time" data-k="end" value="${c.end}"></label></div>
+      <div class="row"><label class="f">Where (optional)<input type="text" data-k="where" value="${esc(c.where||'')}" placeholder="e.g. Science Hall 204"></label><label class="f">Drive time (min)<input type="number" data-k="drive" min="0" max="240" step="5" value="${c.drive ?? ''}" placeholder="none"></label></div>
       <div class="row" style="margin-bottom:0"><label class="f">Term starts<input type="date" data-k="from" value="${c.from||''}"></label><label class="f">Term ends<input type="date" data-k="until" value="${c.until||''}"></label></div>
     </div>`).join('') || '<p class="hint">No courses yet.</p>';
 }
@@ -1562,7 +1597,7 @@ if($('icsOut')) $('icsOut').onclick = ()=>{
   const lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Waypoint Ink//Schedule Compass//EN','CALSCALE:GREGORIAN','X-WR-CALNAME:'+icsEsc((S.settings.name||'My')+"'s Week")];
   days.forEach((k,i)=>plans[i].blocks.forEach((b,j)=>{
     if(!['class','work','study','fun','appt'].includes(b.cat) || b.sleep) return;
-    lines.push('BEGIN:VEVENT','UID:ww-'+k+'-'+j+'-'+b.s+'@schedulecompass','DTSTAMP:'+stamp,'DTSTART:'+icsLocal(k,b.s),'DTEND:'+icsLocal(k,Math.min(b.e,1439)),'SUMMARY:'+icsEsc(b.label),'END:VEVENT');
+    lines.push('BEGIN:VEVENT','UID:ww-'+k+'-'+j+'-'+b.s+'@schedulecompass','DTSTAMP:'+stamp,'DTSTART:'+icsLocal(k,b.s),'DTEND:'+icsLocal(k,Math.min(b.e,1439)),'SUMMARY:'+icsEsc(b.label),...(b.where?['LOCATION:'+icsEsc(b.where)]:[]),'END:VEVENT');
   }));
   S.dates.filter(d=>d.source !== 'ics').forEach(d=>lines.push('BEGIN:VEVENT','UID:ww-date-'+d.id+'@schedulecompass','DTSTAMP:'+stamp,'DTSTART;VALUE=DATE:'+d.start.replace(/-/g,''),'DTEND;VALUE=DATE:'+addDays(d.end||d.start,1).replace(/-/g,''),'SUMMARY:'+icsEsc((d.kind==='off'?'No classes: ':'')+d.label),'END:VEVENT'));
   lines.push('END:VCALENDAR');
@@ -1596,7 +1631,7 @@ function shareText(what, all){
   const dayLines = i => {
     const k = days[i], lines = [];
     datesOn(k).forEach(d => lines.push('• ' + (d.kind === 'off' ? 'No classes: ' : '') + d.label));
-    plans[i].blocks.filter(keep).forEach(b => lines.push(b.sleep ? '• ' + b.label + ' from ' + fmt(b.s) : '• ' + fmtRange(b.s, b.e) + '  ' + b.label));
+    plans[i].blocks.filter(keep).forEach(b => lines.push(b.sleep ? '• ' + b.label + ' from ' + fmt(b.s) : '• ' + fmtRange(b.s, b.e) + '  ' + b.label + (b.where && b.cat !== 'drive' ? ' @ ' + b.where : '')));
     return lines.length ? lines : ['• Nothing scheduled'];
   };
   const day = i => { const d = fromKey(days[i]); return DAYS[d.getDay()] + ', ' + niceDate(days[i]); };
@@ -1724,9 +1759,9 @@ $('addPaste').onclick = ()=>{
 $('addOne').onclick = ()=>{
   const date = $('fDate').value, s = $('fStart').value, e = $('fEnd').value, type = $('fType').value;
   if(!date || !s || !e){ $('oneMsg').textContent = 'Pick a date, a start time and an end time.'; return; }
-  S.events.push({id:uid(), date, start:s, end:e, type, label:$('fLabel').value.trim() || TYPE_LABEL[type]});
+  S.events.push({id:uid(), date, start:s, end:e, type, label:$('fLabel').value.trim() || TYPE_LABEL[type], where:$('fWhere').value.trim(), drive:driveVal($('fDrive').value)});
   save(); weekStart = mondayOf(fromKey(date)); renderWeek(); renderEvents();
-  $('oneMsg').textContent = 'Added to '+DAYS[fromKey(date).getDay()]+', '+niceDate(date)+'.'; $('fLabel').value = '';
+  $('oneMsg').textContent = 'Added to '+DAYS[fromKey(date).getDay()]+', '+niceDate(date)+'.'; $('fLabel').value = ''; $('fWhere').value = ''; $('fDrive').value = '';
 };
 $('evList').addEventListener('click', ev=>{ const id = ev.target.closest('[data-del]')?.dataset.del; if(!id) return;
   S.events = S.events.filter(e=>e.id!==id); save(); renderWeek(); renderEvents(); });
@@ -1741,6 +1776,7 @@ function classEdit(ev, rerender){
   const row = ev.target.closest('[data-cid]'); if(!row) return;
   const c = S.classes.find(x=>x.id===row.dataset.cid); if(!c) return;
   if(ev.target.dataset.day!==undefined){ const d = +ev.target.dataset.day; c.days = ev.target.checked ? [...new Set([...c.days,d])] : c.days.filter(x=>x!==d); }
+  else if(ev.target.dataset.k === 'drive') c.drive = driveVal(ev.target.value);
   else if(ev.target.dataset.k) c[ev.target.dataset.k] = ev.target.dataset.k === 'credits' ? (parseFloat(ev.target.value)||0) : ev.target.value;
   save(); if(rerender) renderWeek();
 }

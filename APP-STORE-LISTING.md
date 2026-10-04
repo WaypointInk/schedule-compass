@@ -32,6 +32,7 @@ PLANS YOUR STUDY TIME
 
 WORKS AROUND YOUR LIFE
 • Add work shifts, appointments and plans, and every day rebuilds around them.
+• Add where things are and how long the drive is. Drive time shows up in your day, and you can tap for directions.
 • Early shift? Your sleep and morning routine move too.
 • A weekly walk or nature break is built in.
 
