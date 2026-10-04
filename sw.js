@@ -1,7 +1,7 @@
 // Schedule Compass offline support.
 // The app itself is cached on install so it opens with no internet.
 // Fonts and the photo-reading engine are cached the first time they load.
-const VERSION = 'sc-1.0.3';
+const VERSION = 'sc-1.0.4';
 const APP = ['./', './index.html', './manifest.webmanifest', './privacy.html', './support.html',
   './icon-192.png', './icon-512.png'];
 const RUNTIME_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com', 'cdn.jsdelivr.net', 'tessdata.projectnaptha.com'];

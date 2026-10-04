@@ -394,7 +394,23 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       <button class="btn" id="thisWeek">This week</button>
       <span class="spacer"></span>
       <button class="btn" id="goAdd">+ Add shifts</button>
+      <button class="btn" id="share">Share</button>
       <button class="btn primary" id="print">Print this week</button>
+    </div>
+    <div class="card printpanel" id="sharePanel" hidden>
+      <h2 class="display">Share your schedule</h2>
+      <p class="hint" style="margin:0">Send your day or week to friends and family by text or email.</p>
+      <label class="f">What to share<select id="shWhat"></select></label>
+      <label><input type="checkbox" id="shAll"> Include meals, routines and sleep</label>
+      <label class="f">Message (you can edit it)<textarea id="shText" rows="10" style="width:100%;font:inherit;font-size:16px;line-height:1.45;padding:10px;border:1.5px solid var(--line);border-radius:12px;background:var(--card,#fff);color:inherit;resize:vertical"></textarea></label>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn primary" id="shText1">Text it</button>
+        <button class="btn primary" id="shEmail">Email it</button>
+        <button class="btn" id="shCopy">Copy</button>
+        <button class="btn" id="shMore" hidden>More…</button>
+        <button class="btn" id="shCancel">Close</button>
+      </div>
+      <div class="msg" id="shMsg" role="status"></div>
     </div>
     <div class="card printpanel" id="printPanel" hidden>
       <h2 class="display">Print this week</h2>
@@ -1563,7 +1579,7 @@ $('bannerClasses').onclick = ()=>{ if(!S.classes.length){ S.classes.push(newCour
 const shift = n => { weekStart = addDays(weekStart, 7*n); renderWeek(); renderEvents(); $('fDate').value = weekStart; };
 $('prev').onclick = $('prev2').onclick = ()=>shift(-1); $('next').onclick = $('next2').onclick = ()=>shift(1);
 $('thisWeek').onclick = ()=>{ weekStart = mondayOf(new Date()); renderWeek(); renderEvents(); };
-if($('print')) $('print').onclick = ()=>{ showTab('week'); openPrint(); };
+if($('print')) $('print').onclick = ()=>{ showTab('week'); $('sharePanel').hidden = true; openPrint(); };
 function openPrint(){
   const o = S.printOpts;
   document.querySelectorAll('input[name=pOrient]').forEach(r=>r.checked = r.value === o.orient);
@@ -1571,6 +1587,55 @@ function openPrint(){
   $('printPanel').hidden = false; $('printPanel').scrollIntoView({block:'nearest'});
 }
 $('cancelPrint').onclick = ()=>{ $('printPanel').hidden = true; };
+
+/* ---------- share by text or email ---------- */
+// A plain-text version of a day or the week: classes, work, study, plans and school dates (meals and routines optional).
+function shareText(what, all){
+  const days = weekDays(), {plans} = planWeek(days), n = S.settings.name.trim();
+  const keep = b => all || (!b.sleep && b.cat !== 'routine' && b.cat !== 'meal');
+  const dayLines = i => {
+    const k = days[i], lines = [];
+    datesOn(k).forEach(d => lines.push('• ' + (d.kind === 'off' ? 'No classes: ' : '') + d.label));
+    plans[i].blocks.filter(keep).forEach(b => lines.push(b.sleep ? '• ' + b.label + ' from ' + fmt(b.s) : '• ' + fmtRange(b.s, b.e) + '  ' + b.label));
+    return lines.length ? lines : ['• Nothing scheduled'];
+  };
+  const day = i => { const d = fromKey(days[i]); return DAYS[d.getDay()] + ', ' + niceDate(days[i]); };
+  if(what === 'week'){
+    const out = [(n ? n + "'s week" : 'My week') + ' · ' + rangeText()];
+    days.forEach((k, i) => out.push('', day(i), ...dayLines(i)));
+    return out.concat('', 'Sent from Schedule Compass').join('\n');
+  }
+  const i = +what;
+  return [(n ? n + "'s day" : 'My day') + ' · ' + day(i), ...dayLines(i), '', 'Sent from Schedule Compass'].join('\n');
+}
+function shareTitle(){ const w = $('shWhat'); return w.options[w.selectedIndex].text.replace(/^Today · /, 'Today, '); }
+function fillShare(){ $('shText').value = shareText($('shWhat').value, $('shAll').checked); $('shMsg').textContent = ''; }
+function openShare(){
+  const days = weekDays(), t = days.indexOf(todayKey());
+  $('shWhat').innerHTML = '<option value="week">The whole week · ' + esc(rangeText()) + '</option>' +
+    days.map((k, i) => { const d = fromKey(k); return '<option value="' + i + '">' + (i === t ? 'Today · ' : '') + DAYS[d.getDay()] + ', ' + niceDate(k) + '</option>'; }).join('');
+  $('shWhat').value = t >= 0 ? String(t) : 'week';
+  $('shMore').hidden = !(IS_NATIVE && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) && !navigator.share;
+  $('printPanel').hidden = true; fillShare(); $('sharePanel').hidden = false; $('sharePanel').scrollIntoView({block:'nearest'});
+}
+const openLink = url => { const a = document.createElement('a'); a.href = url; document.body.appendChild(a); a.click(); a.remove(); };
+$('share').onclick = openShare;
+$('shWhat').onchange = $('shAll').onchange = fillShare;
+$('shCancel').onclick = ()=>{ $('sharePanel').hidden = true; };
+// "sms:?&body=" opens Messages with the text filled in on iPhone and Android; "mailto:" opens the mail app.
+$('shText1').onclick = ()=>openLink('sms:?&body=' + encodeURIComponent($('shText').value));
+$('shEmail').onclick = ()=>openLink('mailto:?subject=' + encodeURIComponent((S.settings.name.trim() ? S.settings.name.trim() + "'s schedule" : 'My schedule') + ' · ' + shareTitle()) + '&body=' + encodeURIComponent($('shText').value));
+$('shCopy').onclick = async ()=>{
+  const t = $('shText').value;
+  try{ await navigator.clipboard.writeText(t); }
+  catch(e){ const ta = $('shText'); ta.focus(); ta.select(); try{ document.execCommand('copy'); }catch(_){} }
+  $('shMsg').textContent = 'Copied. Paste it into any message.';
+};
+$('shMore').onclick = async ()=>{
+  const text = $('shText').value, Sh = IS_NATIVE && window.Capacitor.Plugins && window.Capacitor.Plugins.Share;
+  try{ if(Sh) await Sh.share({title:'My schedule', text, dialogTitle:'Share your schedule'}); else await navigator.share({title:'My schedule', text}); }
+  catch(e){ if(!/cancel|abort/i.test(String(e && (e.message || e.name)))) $('shMsg').textContent = "Couldn't open sharing. Try Text it, Email it or Copy."; }
+};
 function renderNotesPage(){
   const n = S.settings.name.trim(), boxes = weekDays().map(k=>{ const d = fromKey(k), img = S.notes[k];
     return `<div class="nbx"><b>${DAYS[d.getDay()]} · ${niceDate(k)}</b><div class="ln">${img && S.printOpts.ink ? `<img src="${img}" alt="">` : ''}</div></div>`; });
