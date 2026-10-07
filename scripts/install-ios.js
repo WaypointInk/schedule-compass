@@ -15,12 +15,13 @@ x = x.replace(/customClass="CAPBridgeViewController" customModule="Capacitor"/, 
 if(!x.includes('customClass="MainViewController"')){ console.error('Could not point Main.storyboard at MainViewController'); process.exit(1); }
 fs.writeFileSync(sb, x);
 
-// 3) Info.plist: permission text (the calendar photo button can open the camera) + "no special encryption" answer
+// 3) Info.plist: permission text (the calendar photo button can open the camera; "Save Image" for the day's wallpaper) + "no special encryption" answer
 const plist = path.join(app, 'Info.plist');
 let p = fs.readFileSync(plist, 'utf8');
 const addStr = (k, v) => { if(!p.includes(`<key>${k}</key>`)) p = p.replace(/<dict>/, `<dict>\n\t<key>${k}</key>\n\t<string>${v}</string>`); };
 addStr('NSCameraUsageDescription', 'Take a photo of your school calendar so Schedule Compass can find days off and deadlines. Photos stay on your device.');
 addStr('NSPhotoLibraryUsageDescription', 'Choose a photo or screenshot of your school calendar so Schedule Compass can find days off and deadlines. Photos stay on your device.');
+addStr('NSPhotoLibraryAddUsageDescription', 'Save a picture of your day to Photos so you can use it as your Lock Screen wallpaper.');
 if(!p.includes('<key>ITSAppUsesNonExemptEncryption</key>')) p = p.replace(/<dict>/, '<dict>\n\t<key>ITSAppUsesNonExemptEncryption</key>\n\t<false/>');
 fs.writeFileSync(plist, p);
 
