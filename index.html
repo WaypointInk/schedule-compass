@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <style>/* never let anything push the page wider than the screen */html,body{overflow-x:clip}</style>
 <title>Schedule Compass</title>
-<meta name="description" content="A weekly planner for college students that builds every day around classes, credits, work shifts and sleep.">
+<meta name="description" content="A weekly planner that builds every day around school, work, family plans, chores and sleep.">
 <meta name="theme-color" content="#2B4570">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -238,13 +238,64 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
   .hero{padding:18px}
   .looks{grid-template-columns:1fr}
 }
+/* choice pills (roles, extras, who) */
+.picks{display:flex;flex-wrap:wrap;gap:8px}
+.pick{position:relative}
+.pick input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.pick span{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:8px 16px;border:1.5px solid var(--line);border-radius:var(--pill);cursor:pointer;font-weight:500;color:var(--accent-deep);background:var(--card)}
+.pick input:checked+span{background:var(--accent);border-color:var(--accent);color:#fff}
+.pick input:checked+span::before{content:"✓";font-weight:700}
+.pick input:focus-visible+span{outline:3px solid var(--line);outline-offset:2px}
+.pick small{font-weight:400;opacity:.85}
+.subbox{border:1.5px dashed var(--line);border-radius:var(--radius);padding:12px;display:flex;flex-direction:column;gap:10px}
+.subbox h4{margin:0;font-size:15px;color:var(--accent-deep)}
+/* family & chores on the week */
+.famchips{display:flex;flex-direction:column;gap:4px}
+.fchip{border-radius:var(--blk-radius);padding:5px 8px;font-size:12.5px;line-height:1.25;background:var(--card);border:1.5px solid var(--line);border-left:5px solid var(--pc,var(--accent))}
+.fchip b{font-weight:600}
+.fchip .who{display:block;font-size:11.5px;color:var(--muted)}
+.bdchip{border-radius:var(--blk-radius);padding:6px 8px;font-size:13px;font-weight:600;text-align:center;background:var(--soft);color:var(--accent-deep);border:1.5px solid var(--accent)}
+.chores{display:flex;flex-direction:column;gap:2px;border-top:1.5px dashed var(--line);padding-top:6px}
+.chores .ch-h{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.chore{display:flex;align-items:flex-start;gap:8px;font-size:13px;min-height:32px;padding:4px 2px;cursor:pointer;line-height:1.25}
+.chore input{width:20px;height:20px;flex:none;accent-color:var(--accent);margin:0}
+.chore input:checked+span{text-decoration:line-through;opacity:.6}
+.chore small{color:var(--muted)}
+.prow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:end;border:1.5px solid var(--line);border-radius:var(--radius);padding:12px;margin-bottom:10px}
+.prow .row{margin:0}
+.pdot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:4px}
+/* Today view */
+.todayv{position:fixed;inset:0;z-index:55;background:var(--paper);overflow-y:auto;padding:max(18px,env(safe-area-inset-top)) 16px max(30px,env(safe-area-inset-bottom))}
+.tvin{max-width:540px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.tvtop{display:flex;align-items:center;gap:10px}
+.tvd{flex:1;text-align:center;min-width:0}
+.tvd .kicker{margin:0}
+.tvd h2{margin:2px 0 0;font-size:32px;line-height:1.1;color:var(--accent-deep)}
+.tvaff{font-size:22px;line-height:1.25;color:var(--accent-deep);text-align:center;background:var(--soft);border-radius:var(--radius);padding:14px 16px;text-wrap:balance}
+[data-look="slate"] .tvaff{text-transform:none;letter-spacing:0}
+.tvlist{display:flex;flex-direction:column;gap:8px}
+.tvlist .blk{display:grid;grid-template-columns:104px minmax(0,1fr);gap:4px 10px;padding:10px 12px;align-items:baseline}
+.tvlist .blk .t{font-size:13px}.tvlist .blk .l{font-size:16px}
+.tvlist .blk .w,.tvlist .blk .n{grid-column:2}
+.tvfoot{display:flex;gap:10px;flex-wrap:wrap}
+.tvfoot .btn{flex:1 1 200px}
+/* birthday */
+.bday{position:fixed;inset:0;z-index:65;background:rgba(25,20,24,.5);display:grid;place-items:center;padding:16px;overflow:auto}
+.bdbox{background:var(--card);border-radius:calc(var(--radius) + 6px);padding:26px 22px;width:min(520px,100%);display:flex;flex-direction:column;gap:12px;text-align:center;border:2px solid var(--line)}
+.bdbox .cake{font-size:54px;line-height:1}
+.bdbox h2{margin:0;font-size:34px;color:var(--accent-deep);line-height:1.1}
+.bdbox ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;text-align:left}
+.bdbox li{background:var(--soft);border-radius:12px;padding:10px 12px;font-size:15px;color:var(--ink)}
+.bdbox li b{color:var(--accent-deep)}
+.hero .bdbtn{margin-top:10px}
 .print-only{display:none}
 @media print{
   @page{size:letter landscape;margin:0.35in}
   html,body{background:#fff!important}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .wrap{max-width:none;padding:0}
-  .hero,.tabs,.bar,.no-print,.banner,.studybar,#add,#routine,#school,.foot,.top,.welcome{display:none!important}
+  .hero,.tabs,.bar,.no-print,.banner,.studybar,#add,#routine,#school,#family,.foot,.top,.welcome{display:none!important}
+  body.p-portrait .dblocks .fchip{width:calc(33.333% - 2px)} body.p-portrait .dblocks .chores{width:100%;flex-direction:row;flex-wrap:wrap;gap:2px 10px}
   #week{display:block!important}
   .print-only{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:8px}
   .week{grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
@@ -254,7 +305,9 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
   .day h3{font-size:18px}.day .aff{font-size:12px;padding:5px}
   .blk{padding:3px 5px}.blk .t{font-size:9.5px}.blk .l{font-size:10.5px}.blk .n{font-size:9.5px}
   .daysum{font-size:9.5px}.legend{margin:0 0 8px;font-size:10px}
-  .printpanel,.notebtn,.notepad{display:none!important}
+  .printpanel,.notebtn,.notepad,.todayv,.bday{display:none!important}
+  .chore{min-height:0;padding:1px 0;font-size:10px}.chore input{width:11px;height:11px}.chores .ch-h{font-size:8.5px}
+  .fchip{font-size:9.5px;padding:2px 5px}.fchip .who{font-size:8.5px}.bdchip{font-size:10px;padding:3px}
   .dhead,.dblocks{gap:4px}
   body.p-compact .blk.c-meal{display:none}
   body:not(.p-ink) .dnotes img{display:none}
@@ -301,7 +354,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     <div>
       <p class="kicker">Schedule Compass · setup</p>
       <h2 class="display" id="wTitle">Let's build <span class="name" id="wName">your</span> planner</h2>
-      <p class="hint" style="margin-top:8px">A few quick choices. You can change any of them later under “My courses, routine &amp; look.”</p>
+      <p class="hint" style="margin-top:8px">A few quick choices. You can change any of them later under “My setup, routine &amp; look.”</p>
     </div>
     <div class="step">
       <h3 class="display"><span>Step 1</span>What's your name?</h3>
@@ -309,6 +362,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     </div>
     <div class="step">
       <h3 class="display"><span>Step 2</span>Pick your look</h3>
+      <p class="hint" style="margin:0">Not into flowers and script? <strong>Natural</strong> and <strong>Bold</strong> are clean and simple.</p>
       <div class="looks" id="wLooks"></div>
     </div>
     <div class="step">
@@ -327,13 +381,25 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       </div>
     </div>
     <div class="step">
-      <h3 class="display"><span>Step 5</span>Your courses this term</h3>
-      <p class="hint" style="margin:0">Add each course and its credits. Study time is planned from your credits: about 2 hours a week per credit (you can change that later). Online class with no set time? Leave the days blank.</p>
-      <div id="wClassList"></div>
-      <button class="btn" id="wAddClass" style="align-self:flex-start">+ Add a course</button>
+      <h3 class="display"><span>Step 5</span>What fills your week?</h3>
+      <p class="hint" style="margin:0">Pick as many as you need. Anything you don't pick stays out of the way.</p>
+      <div class="picks" id="wRoles"></div>
+      <div class="subbox" id="wHsBox" hidden><h4>Your school day</h4><div id="wSchool"></div></div>
+      <div class="subbox" id="wCollegeBox" hidden><h4>Your college courses</h4>
+        <p class="hint" style="margin:0">Add each course and its credits. Study time is planned from your credits: about 2 hours a week per credit (you can change that later). Online class with no set time? Leave the days blank.</p>
+        <div id="wClassList"></div>
+        <button class="btn" id="wAddClass" style="align-self:flex-start">+ Add a course</button>
+      </div>
     </div>
     <div class="step">
-      <h3 class="display"><span>Step 6 · optional</span>Your school calendar</h3>
+      <h3 class="display"><span>Step 6 · optional</span>Extras</h3>
+      <p class="hint" style="margin:0">Turn on only what you want. You can change these any time.</p>
+      <div class="picks" id="wExtras"></div>
+      <div class="row" style="margin:6px 0 0"><label class="f">My birthday · month<select id="wBdayM"></select></label><label class="f">Day<select id="wBdayD"></select></label></div>
+      <p class="hint" style="margin:0">Add your birthday and you'll get a birthday message with a look back at your year.</p>
+    </div>
+    <div class="step" id="wCalStep">
+      <h3 class="display"><span>Step 7 · optional</span>Your school calendar</h3>
       <p class="hint" style="margin:0">Snap a photo of your school's academic calendar and your planner will mark days off, registration deadlines and term dates. Or load a calendar file (.ics) from Google or Outlook. You can do this now or later.</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
         <label class="btn" style="display:inline-flex;align-items:center;cursor:pointer;position:relative">Take or choose a photo<input type="file" id="wCalPhoto" accept="image/*" style="position:absolute;opacity:0;width:1px;height:1px"></label>
@@ -381,7 +447,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     <button class="tab" role="tab" aria-selected="true" aria-controls="week" id="t-week">My week</button>
     <button class="tab" role="tab" aria-selected="false" aria-controls="add" id="t-add">Add shifts &amp; plans</button>
     <button class="tab" role="tab" aria-selected="false" aria-controls="school" id="t-school">School dates &amp; calendars</button>
-    <button class="tab" role="tab" aria-selected="false" aria-controls="routine" id="t-routine">My courses, routine &amp; look</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="family" id="t-family" hidden>Family &amp; chores</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="routine" id="t-routine">My setup, routine &amp; look</button>
   </nav>
 
   <section class="panel on" id="week" role="tabpanel" aria-labelledby="t-week">
@@ -394,6 +461,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       <div class="range display" id="range"></div>
       <button class="icon-btn" id="next" aria-label="Next week"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="btn" id="thisWeek">This week</button>
+      <button class="btn" id="openToday">Today view</button>
       <span class="spacer"></span>
       <button class="btn" id="goAdd">+ Add shifts</button>
       <button class="btn" id="share">Share</button>
@@ -401,8 +469,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     </div>
     <div class="card printpanel" id="sharePanel" hidden>
       <h2 class="display">Share your schedule</h2>
-      <p class="hint" style="margin:0">Send your day or week to friends and family by text or email.</p>
-      <label class="f">What to share<select id="shWhat"></select></label>
+      <p class="hint" style="margin:0">Send a day, a week or the next four weeks by text or email, add it to any calendar app, or print it.</p>
+      <div class="row" style="margin:0"><label class="f">What to share<select id="shWhat"></select></label><label class="f" id="shWhoL" hidden>Whose schedule<select id="shWho"></select></label></div>
       <label><input type="checkbox" id="shAll"> Include meals, routines and sleep</label>
       <label class="f">Message (you can edit it)<textarea id="shText" rows="10" style="width:100%;font:inherit;font-size:16px;line-height:1.45;padding:10px;border:1.5px solid var(--line);border-radius:12px;background:var(--card,#fff);color:inherit;resize:vertical"></textarea></label>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -410,8 +478,11 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
         <button class="btn primary" id="shEmail">Email it</button>
         <button class="btn" id="shCopy">Copy</button>
         <button class="btn" id="shMore" hidden>More…</button>
+        <button class="btn" id="shIcs">Calendar file</button>
+        <button class="btn" id="shPrint">Print</button>
         <button class="btn" id="shCancel">Close</button>
       </div>
+      <p class="hint" style="margin:0"><strong>Calendar file</strong> works with Apple Calendar, Google Calendar and Outlook: open it and tap Add.</p>
       <div class="msg" id="shMsg" role="status"></div>
     </div>
     <div class="card printpanel" id="printPanel" hidden>
@@ -430,7 +501,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn primary" id="doPrint">Print</button><button class="btn" id="cancelPrint">Cancel</button></div>
     </div>
     <div class="banner" id="startBanner" hidden>
-      <p><strong>Your week is already planned around sleep, meals and study.</strong> Add your classes and work shifts and it rebuilds every day around them.</p>
+      <p><strong>Your week is already planned around sleep and meals.</strong> <span id="bannerMore">Add your classes and work shifts and it rebuilds every day around them.</span></p>
       <button class="btn primary" id="bannerClasses">Add my classes</button>
       <button class="btn" id="bannerShifts">Add shifts</button>
     </div>
@@ -465,6 +536,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
               <option value="appt">Appointments</option><option value="class">Extra classes / exams</option>
             </select>
           </label>
+          <label class="f" id="pasteWhoL" hidden>For<select id="pasteWho"></select></label>
           <label class="f" style="justify-content:flex-end">&nbsp;<button class="btn primary" id="addPaste">Add to my calendar</button></label>
         </div>
         <div class="msg" id="pasteMsg" role="status"></div>
@@ -483,6 +555,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
           <label class="f">Ends<input type="time" id="fEnd" value="13:00"></label>
         </div>
         <label class="f">Name (optional)<input type="text" id="fLabel" placeholder="Work shift"></label>
+        <div id="fWhoRow" hidden style="margin-top:10px"><span class="f" style="font-size:13px;color:var(--muted);font-weight:500">Who's it for? <small>(leave yourself off if you're not going)</small></span><div class="picks" id="fWho" style="margin-top:6px"></div></div>
         <div class="row" style="margin-bottom:12px">
           <label class="f">Where (optional)<input type="text" id="fWhere" placeholder="e.g. 210 Main St"></label>
           <label class="f">Drive time (min)<input type="number" id="fDrive" min="0" max="240" step="5" placeholder="none"></label>
@@ -492,7 +565,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       </div>
       <div class="card">
         <h2 class="display">This week's plans</h2>
-        <p class="hint">Tap × to remove something. Classes live under “My courses, routine &amp; look.”</p>
+        <p class="hint">Tap × to remove something. Classes and your school day live under “My setup, routine &amp; look.”</p>
         <ul class="list" id="evList"></ul>
       </div>
     </div>
@@ -546,8 +619,41 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     </div>
   </section>
 
+  <section class="panel" id="family" role="tabpanel" aria-labelledby="t-family">
+    <div class="cards">
+      <div class="card" id="peopleCard">
+        <h2 class="display">My family</h2>
+        <p class="hint">Add the people you plan with. Then pick who each plan is for on “Add plans.” Their plans show on your week in their color, and only the ones you're going to are planned around. Share one person's schedule, or everyone's, from <strong>Share</strong>.</p>
+        <div id="peopleList"></div>
+        <button class="btn" id="addPerson">+ Add a person</button>
+      </div>
+      <div class="card" id="choresCard">
+        <h2 class="display">Chores</h2>
+        <p class="hint">Give each chore a name and who does it. Pick the days it's due, or leave the days blank for every day. Check them off right on your week.</p>
+        <div id="choreList"></div>
+        <button class="btn" id="addChore">+ Add a chore</button>
+        <datalist id="whoNames"></datalist>
+      </div>
+    </div>
+  </section>
+
   <section class="panel" id="routine" role="tabpanel" aria-labelledby="t-routine">
     <div class="cards">
+      <div class="card" id="setupCard">
+        <h2 class="display">What's in my planner</h2>
+        <p class="hint">Pick as many as you need. Anything you don't pick stays out of the way.</p>
+        <div class="picks" id="sRoles"></div>
+        <p class="hint" style="margin:14px 0 8px">Extras</p>
+        <div class="picks" id="sExtras"></div>
+        <div class="row" style="margin:14px 0 0"><label class="f">My birthday · month<select id="sBdayM"></select></label><label class="f">Day<select id="sBdayD"></select></label></div>
+        <label class="f" style="margin-top:10px">Affirmations
+          <select id="sAff"><option value="auto">Match my look</option><option value="sweet">Sweet &amp; encouraging</option><option value="calm">Calm &amp; simple</option><option value="coach">Pep talk</option><option value="off">Turn them off</option></select></label>
+      </div>
+      <div class="card" id="schoolCard">
+        <h2 class="display">My school day</h2>
+        <p class="hint">Your planner builds every school day around these times, and plans homework time after school.</p>
+        <div id="sSchool"></div>
+      </div>
       <div class="card" id="classesCard">
         <h2 class="display">My courses</h2>
         <p class="hint">Credits set your weekly study time. Class times repeat every week; add the term's first and last day so they stop after the term. Online course with no set time? Leave the days blank.</p>
@@ -609,6 +715,32 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     <canvas id="npCanvas" width="1000" height="750" aria-label="Handwriting area. Write with your finger, a stylus or a mouse."></canvas>
     <div class="nfoot"><button class="btn" id="npDelete">Delete note</button><span class="spacer"></span><button class="btn" id="npCancel">Cancel</button><button class="btn primary" id="npSave">Save note</button></div>
     <div class="msg" id="npMsg" role="status"></div>
+  </div>
+</div>
+
+<div class="todayv" id="todayView" role="dialog" aria-modal="true" aria-labelledby="tvDate" hidden>
+  <div class="tvin">
+    <div class="tvtop">
+      <button class="icon-btn" id="tvPrev" aria-label="Previous day"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <div class="tvd"><p class="kicker" id="tvKick"></p><h2 class="display" id="tvDate"></h2></div>
+      <button class="icon-btn" id="tvNext" aria-label="Next day"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+    <div class="tvaff display" id="tvAff"></div>
+    <div id="tvBody"></div>
+    <div class="tvfoot"><button class="btn primary" id="tvWall">Save as phone background</button><button class="btn" id="tvClose">See my whole week</button></div>
+    <p class="hint" id="tvHint" style="margin:0">Saves a picture of this day for your Lock Screen. In Photos, open it, tap Share, then <strong>Use as Wallpaper</strong>. Make a new one whenever your day changes.</p>
+    <div class="msg" id="tvMsg" role="status"></div>
+  </div>
+</div>
+
+<div class="bday" id="bdayView" role="dialog" aria-modal="true" aria-labelledby="bdTitle" hidden>
+  <div class="bdbox">
+    <div class="cake" aria-hidden="true">🎂</div>
+    <h2 class="display" id="bdTitle">Happy birthday!</h2>
+    <p class="hint" id="bdIntro" style="margin:0"></p>
+    <ul id="bdList"></ul>
+    <p class="display" id="bdClose" style="margin:0;font-size:20px;color:var(--accent-deep)"></p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center"><button class="btn" id="bdShare">Share my year</button><button class="btn primary" id="bdDone">Thank you!</button></div>
   </div>
 </div>
 
@@ -991,15 +1123,82 @@ const AFFIRMATIONS = [
 "I remember that I've done hard things before.",
 "I am proud of my soft heart and my strong spine."
 ];
+// More sweet ones, plus two other styles for people who want something plainer or more of a pep talk.
+const AFF_MORE = [
+"I am allowed to start small.","My pace is my own, and it is enough.","I give myself the same kindness I give my friends.","I am a cozy, safe place for my own heart.",
+"Little by little, I am getting there.","I can hold big dreams and tiny steps at once.","I am worth slowing down for.","Today I water the things I want to grow.",
+"I make room for laughter today.","My heart knows the way.","I am a sunrise kind of person: I always come back.","I trust myself with my own day.",
+"I am proud of the way I care for others.","I am allowed to say no kindly.","I collect small joys and keep them close.","I let my day be gentle where it can be.",
+"I deserve a fresh start every morning.","I am made of stardust and stubbornness.","I give my worries a nap today.","I am exactly the right amount of me.",
+"My softness is a strength.","I can be tired and still be doing great.","I am becoming someone I'd want to be friends with.","I bloom wherever I'm planted.",
+"I let myself be cheered on today.","I hold my own hand through hard things.","I am a good thing happening.","I wear my confidence like my favorite sweater.",
+"I make my own sunshine on cloudy days.","I am a little bit braver than yesterday.","I deserve to take up room in my own schedule.","I am proud of every page I've turned.",
+"My future is full of good surprises.","I can rest my mind and still reach my goals.","I give my best and call it beautiful.","I am cherished, and I cherish myself.",
+"I choose a soft start and a strong finish.","I am thankful for my one wild, precious day.","I am kind to the girl, the kid, the person I used to be.","I am loved on my busy days and my lazy days.",
+"I leave a little sparkle everywhere I go.","My dreams fit perfectly in my hands.","I am glowing with quiet pride.","I trust my heart to lead me home.",
+"I keep showing up, and that is magic.","I am a gentle force to be reckoned with.","Every day I add a little more light.","I am planting seeds for a beautiful life.",
+"I am allowed to be a masterpiece and a mess.","I have a beautiful way of seeing the world.","I give myself credit, out loud.","I am the cozy blanket on my own hard days.",
+"I celebrate the small brave things.","My kind heart is my superpower.","I am thankful for the people who make me laugh.","I am patient with the parts of me still growing.",
+"I let today be lovely.","I deserve sweet things, big and small.","I trust that good timing is coming my way.","I am more capable than my worries say."
+];
+const AFF_CALM = [
+"One thing at a time.","Today is a fresh start.","I can handle what today brings.","Steady progress is still progress.","I do my best with what I have.",
+"I focus on what I can control.","Small steps add up.","I have time for what matters most.","I can take a breath and begin again.","Done is better than perfect.",
+"I keep my promises to myself.","I learn something every day.","I trust my own judgment.","I stay calm and keep going.","I prepare, then I let it go.",
+"Rest is part of the plan.","I am ready for today.","I take care of my body and my mind.","I can do hard things.","I show up, even on slow days.",
+"Today I'll do the next right thing.","Hard work adds up over time.","I am organized and prepared.","I can ask for help when I need it.","My effort matters.",
+"I choose focus over worry.","I finish what I start.","Mistakes help me learn.","I make time for the people I care about.","Good habits make good days.",
+"I set the tone for my day.","I am patient with my progress.","I use my time well.","I'm allowed to change plans.","I keep things simple.",
+"I am proud of the work I put in.","I can be calm under pressure.","I listen, learn and adjust.","I make room for fresh air today.","Today counts.",
+"Every day I get a little better.","I stay curious.","I can start before I feel ready.","I give today my full attention.","I treat others with respect, and myself too.",
+"A good night's sleep is part of the work.","I don't have to do it all today.","I trust the plan and adjust as I go.","I take pride in doing things well.","I stay steady when things get busy.",
+"I can learn anything with practice.","I put my energy where it counts.","I meet today with a clear head.","My best is enough for today.","I keep moving forward.",
+"I know what matters to me.","I handle problems one at a time.","I am responsible for my own effort.","I can be both relaxed and focused.","Today I'll be kind and get things done.",
+"Consistency beats intensity.","I am building something that lasts.","I notice what's going well.","I can reset at any point in the day.","I make clear choices.",
+"I stay open to new ideas.","Quiet work still counts.","I keep my word.","I bring good energy to the people around me.","I have what I need to start.",
+"I do the hard part first.","I am grateful for today.","I take care of tomorrow by resting tonight.","I can learn from today and let it go.","I am growing, even when it's slow.",
+"Clear plan, calm mind.","I protect my time.","I take things as they come.","I can focus for the next 25 minutes.","Good enough is often good enough.",
+"I make time to move my body.","I trust that I'll figure it out.","I can be proud without being perfect.","Today I'll check one more thing off.","I pace myself.",
+"I stay true to what I value.","Progress, not pressure.","I welcome a good challenge.","I learn the most from the hard days.","I am exactly where I need to be today.",
+"Every week I get a little stronger.","I take a moment to notice the good.","I do what I said I would.","My plan works for me, not the other way around.","Today is a good day to try.",
+"I let small setbacks stay small.","I can be helpful and still take care of myself.","I give each task the time it needs.","I end the day knowing I tried.","Tomorrow is another chance.",
+"I keep calm and carry my own pace.","Easy does it.","I choose what to focus on.","I am capable and prepared.","I welcome what today teaches me.",
+"A clear mind starts with a short list.","I know when to push and when to rest.","My time is valuable.","I stay grounded.","I'm getting better at this every week.",
+"I can do a lot in one good hour.","Breathe in, slow down, begin.","I am thankful for the chance to learn.","I make steady choices.","I respect my own limits."
+];
+const AFF_COACH = [
+"Let's go. Today is yours.","Win the morning, win the day.","You've done harder things than this.","Show up. That's half the battle.","Lock in for one hour. Then breathe.",
+"Discipline is choosing what you want most over what you want now.","Every rep counts, including today's.","Nobody's going to outwork you today.","Get after it.","Make today count.",
+"Small wins stack up fast.","Be the person you'd want on your team.","Don't wait for motivation. Start, and it shows up.","Finish strong.","Keep your eyes on the goal.",
+"Hard days build strong people.","You're further along than you think.","Pressure is a privilege.","Do the work. Trust the work.","Stay hungry. Stay humble.",
+"Champions are built on ordinary days.","Get one percent better today.","One more page. One more problem. One more lap.","Effort is a choice. Choose it.","Today's grind is tomorrow's ease.",
+"Tired is temporary. Proud lasts.","Bet on yourself.","Take the first step and keep moving.","Own your schedule, own your week.","You don't need perfect. You need started.",
+"Show up for future you.","Turn the nerves into fuel.","Big goals, daily habits.","Focus up. Distractions can wait.","You're built for this.",
+"Make your plan, then make it happen.","Consistency is your superpower.","Do it tired. Do it scared. Just do it.","Results come to the ones who keep going.","Your only competition is yesterday's you.",
+"Go earn your rest.","Head down, work hard, look up proud.","The comeback is always stronger than the setback.","Be relentless about what matters.","Today is a good day to prove yourself right.",
+"Effort never goes to waste.","Get comfortable being uncomfortable.","Next play. Keep moving.","Hustle, then rest. Repeat.","You've got the game plan. Now execute.",
+"Strong mind, steady hands.","Don't count the days. Make the days count.","Raise your standards, then rise to meet them.","Do what you can, with what you have, right now.","Earn it today.",
+"Trust your training.","Keep stacking good days.","Stay in the fight.","The work is the shortcut.","You get what you put in. Put in a lot.",
+"Wake up. Gear up. Show up.","Make it simple. Make it happen.","Grit beats talent when talent doesn't work.","Eyes forward.","One task. Full focus. Go.",
+"Today you get to, not you have to.","You're one good hour away from a better day.","Don't break the streak.","Be proud of the sweat.","Every expert started as a beginner.",
+"No excuses. Just adjustments.","Push a little further than yesterday.","Bring the energy.","Finish what you started.","Take care of the basics: sleep, food, effort.",
+"You're not behind. You're building.","Keep it moving.","Show the week who's boss.","Do it for the person you're becoming.","Momentum starts now.",
+"You can rest at the finish line.","Goals don't care about moods. Go anyway.","Stay sharp.","Respect the process.","Good things come to those who grind.",
+"You were made for days like this.","Set the pace.","Commit to the plan.","Be the hardest worker you know.","Get the hard thing done first.",
+"Shake it off and go again.","Recharge, then reload.","Don't stop when you're tired. Stop when you're done.","Make your own luck.","Climb one step at a time.",
+"Strong week starts with a strong today.","Pick it up a notch.","Go be great.","Your future self says thanks.","Win your day, one block at a time."
+];
+const AFF_SWEET = [...new Set([...AFFIRMATIONS, ...AFF_MORE])];
+
 
 
 /* ---------- looks & colors ---------- */
 const LOOKS = {
-  bloom:{label:'Soft', blurb:'Script name, blush tones, arches', chips:['#F7CFDC','#EDE4F7','#D9EEE2','#FBEBB5'], font:"'Parisienne',cursive", defaultColor:'rose',
+  bloom:{label:'Soft', blurb:'Script name, flowers & hearts, blush tones', chips:['#F7CFDC','#EDE4F7','#D9EEE2','#FBEBB5'], font:"'Parisienne',cursive", defaultColor:'rose',
     ready:'Rise, shine & get ready', sleep:'Beauty sleep', me:'Me time ♡', lunch:'Pack a lunch ♡', dinner:'Pack a dinner ♡', walk:'Hike or nature walk', walkNote:'fresh air & sunshine', rest:'Rest & recharge', kicker:"you've got this", foot:'planned with care for {name} ♡', goals:'8+ hrs of beauty sleep · study every day · one walk a week ♡'},
-  sage:{label:'Natural', blurb:'Clean serif, earthy calm tones', chips:['#E3E8D8','#EFE3D3','#D8E6E4','#F1E8C8'], font:"'Fraunces',serif", defaultColor:'sage',
+  sage:{label:'Natural', blurb:'Clean and calm, earthy tones · no flowers', chips:['#E3E8D8','#EFE3D3','#D8E6E4','#F1E8C8'], font:"'Fraunces',serif", defaultColor:'sage',
     ready:'Wake up & get ready', sleep:'Sleep', me:'Free time', lunch:'Pack a lunch', dinner:'Pack a dinner', walk:'Walk or hike', walkNote:'fresh air', rest:'Rest & recharge', kicker:'one day at a time', foot:'planned for {name}', goals:'Sleep first · study every day · one walk a week'},
-  slate:{label:'Bold', blurb:'Strong type, cool steel tones', chips:['#D6E0EE','#E8DCCB','#D5E8DF','#DDE3E9'], font:"'Barlow Condensed',sans-serif", defaultColor:'navy',
+  slate:{label:'Bold', blurb:'Strong and simple, cool tones · no flowers', chips:['#D6E0EE','#E8DCCB','#D5E8DF','#DDE3E9'], font:"'Barlow Condensed',sans-serif", defaultColor:'navy',
     ready:'Get ready', sleep:'Sleep', me:'Free time', lunch:'Pack a lunch', dinner:'Pack a dinner', walk:'Hike / outdoor time', walkNote:'get outside', rest:'Recharge', kicker:'own your week', foot:"{name}'s week, handled", goals:'Sleep · study · train · repeat'},
 };
 const COLORS = {
@@ -1021,20 +1220,68 @@ const KIND_LABEL = {off:'Day off', deadline:'Deadline', event:'School event'};
 const KEY = 'schedule-compass-v1';
 const DEFAULTS = {
   settings:{name:'', look:'bloom', color:'rose', onboarded:false, wake:'07:00', bedtime:'22:30', sleepHrs:8, readyMins:60, nightMins:30,
-            commuteMins:30, walkMins:60, hoursPerCredit:2, maxStudyDay:4, walkDay:'auto'},
-  classes:[], events:[], dates:[], notes:{},
+            commuteMins:30, walkMins:60, hoursPerCredit:2, maxStudyDay:4, walkDay:'auto',
+            roles:['college','work'], family:false, chores:false, startToday:false, bday:'', affStyle:'auto', affSeed:0, bdaySeen:'', since:''},
+  classes:[], events:[], dates:[], notes:{}, people:[], chores:[], choreDone:{},
+  school:{days:[1,2,3,4,5], start:'07:45', end:'14:50', where:'', drive:null, homework:60, from:'', until:''},
   printOpts:{orient:'landscape', lines:true, page:false, ink:true, compact:true}
 };
 let S;
 const clone = o => JSON.parse(JSON.stringify(o));
 function normalize(d){ const b = clone(DEFAULTS);
   return {settings:Object.assign(b.settings, d.settings||{}), classes:Array.isArray(d.classes)?d.classes:[], events:Array.isArray(d.events)?d.events:[], dates:Array.isArray(d.dates)?d.dates:[],
-    notes:(d.notes && typeof d.notes === 'object') ? d.notes : {}, printOpts:Object.assign(b.printOpts, d.printOpts||{})}; }
+    notes:(d.notes && typeof d.notes === 'object') ? d.notes : {}, printOpts:Object.assign(b.printOpts, d.printOpts||{}),
+    people:Array.isArray(d.people)?d.people:[], chores:Array.isArray(d.chores)?d.chores:[], choreDone:(d.choreDone && typeof d.choreDone === 'object') ? d.choreDone : {},
+    school:Object.assign(b.school, d.school||{})}; }
 function load(){ try{ const r = localStorage.getItem(KEY); if(r){ S = normalize(JSON.parse(r)); return; } }catch(e){} S = clone(DEFAULTS); }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); return true; }catch(e){ return false; } }
 const uid = () => Math.random().toString(36).slice(2,9);
 const look = () => LOOKS[S.settings.look] || LOOKS.bloom;
 const newCourse = () => ({id:uid(), name:'', credits:3, days:[], start:'09:00', end:'10:30', from:'', until:''});
+const PCOLORS = ['#2F6F8F','#557A5B','#A65A3A','#7A5BA8','#B04A72','#86651C','#3F4650','#B3261E'];
+const PCOLOR_NAMES = ['Blue','Green','Rust','Purple','Pink','Gold','Gray','Red'];
+const newPerson = () => ({id:uid(), name:'', color:PCOLORS[S.people.length % PCOLORS.length], bday:''});
+const newChore = () => ({id:uid(), name:'', who:'', days:[]});
+// A random number per install (so affirmations come in a different order for everyone) and the first day the planner was used.
+function ensureMeta(){ const st = S.settings, t = todayKey(); let ch = false;
+  if(!st.affSeed){ st.affSeed = 1 + Math.floor(Math.random() * 2147483646); ch = true; }
+  if(!st.since){ st.since = [t, ...S.events.map(e => e.date), ...Object.keys(S.notes)].filter(Boolean).sort()[0]; ch = true; }
+  const old = addDays(t, -400); Object.keys(S.choreDone).forEach(x => { if(x.slice(0, 10) < old){ delete S.choreDone[x]; ch = true; } });
+  if(ch) save(); }
+
+/* ---------- what's in the planner ---------- */
+const ROLE_PICKS = [['hs','High school'], ['college','College'], ['work','Work']];
+const EXTRA_PICKS = [['family','Family calendar'], ['chores','Chores'], ['startToday','Open to Today view']];
+const hasRole = r => (S.settings.roles || []).includes(r);
+const inSchool = () => hasRole('hs') || hasRole('college');
+const picksHtml = (group, items, on) => items.map(([v, l]) => `<label class="pick"><input type="checkbox" name="${group}" value="${v}" ${on(v) ? 'checked' : ''}><span>${esc(l)}</span></label>`).join('');
+const checkedIn = id => [...document.querySelectorAll('#' + id + ' input:checked')].map(i => i.value);
+const FULL_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const monthOpts = md => '<option value="">—</option>' + FULL_MONTHS.map((m, i) => { const v = String(i + 1).padStart(2, '0'); return `<option value="${v}" ${md && md.slice(0, 2) === v ? 'selected' : ''}>${m}</option>`; }).join('');
+const dayOpts = md => '<option value="">—</option>' + Array.from({length:31}, (_, i) => { const v = String(i + 1).padStart(2, '0'); return `<option value="${v}" ${md && md.slice(3) === v ? 'selected' : ''}>${i + 1}</option>`; }).join('');
+const bdayOf = (m, d) => m || d ? (m || '00') + '-' + (d || '00') : '';
+const bdayFrom = (mId, dId) => bdayOf($(mId).value, $(dId).value);
+const fullBday = md => /^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(md || '');
+
+/* ---------- family & chores ---------- */
+// Plans with no "who" (or with "me" in it) are yours and get planned around; the rest show on your week as family plans.
+const forMe = e => !Array.isArray(e.who) || !e.who.length || e.who.includes('me');
+const myName = () => S.settings.name.trim() || 'Me';
+const personName = id => id === 'me' ? myName() : ((S.people.find(p => p.id === id) || {}).name || '').trim() || 'Someone';
+const namedPeople = () => S.people.filter(p => (p.name || '').trim());
+const whoText = e => (Array.isArray(e.who) && e.who.length ? e.who : ['me']).map(personName).join(' & ');
+const whoColor = e => { const p = S.people.find(x => (e.who || []).includes(x.id)); return p ? p.color : 'var(--accent)'; };
+const familyFor = k => S.events.filter(e => e.date === k && !forMe(e)).sort((a, b) => a.start.localeCompare(b.start));
+const choresFor = k => S.settings.chores ? S.chores.filter(c => (c.name || '').trim() && (!c.days || !c.days.length || c.days.includes(fromKey(k).getDay()))) : [];
+const isMine = c => !(c.who || '').trim() || ['me', myName().toLowerCase()].includes(c.who.trim().toLowerCase());
+const isLeap = y => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+// Birthdays on a day: yours and your family's (Feb 29 birthdays show on Feb 28 in other years).
+function birthdaysOn(k){
+  const md = k.slice(5), alt = md === '02-28' && !isLeap(+k.slice(0, 4)) ? '02-29' : null, hit = b => b && (b === md || b === alt), out = [];
+  if(hit(S.settings.bday)) out.push({me:true, name:myName()});
+  namedPeople().forEach(p => { if(hit(p.bday)) out.push({name:p.name.trim()}); });
+  return out;
+}
 
 function applyTheme(lk, col){
   const root = document.documentElement, c = COLORS[col] || COLORS.rose;
@@ -1063,10 +1310,23 @@ const daysBetween = (a,b) => Math.round((fromKey(b)-fromKey(a))/864e5);
 function mondayOf(d){ const x = new Date(d.getFullYear(),d.getMonth(),d.getDate(),12); x.setDate(x.getDate()-((x.getDay()+6)%7)); return keyOf(x); }
 const niceDate = k => { const d = fromKey(k); return MONTHS[d.getMonth()]+' '+d.getDate(); };
 const todayKey = () => keyOf(new Date());
+function affList(){ const st = S.settings, s = !st.affStyle || st.affStyle === 'auto' ? (st.look === 'bloom' ? 'sweet' : 'calm') : st.affStyle;
+  return s === 'off' ? null : s === 'coach' ? AFF_COACH : s === 'calm' ? AFF_CALM : AFF_SWEET; }
+let affPerm = {key:'', p:[]};
 function affirmationFor(k){
-  const d = fromKey(k), doy = Math.round((d - new Date(d.getFullYear(),0,1,12))/864e5);
-  let a = AFFIRMATIONS[doy % AFFIRMATIONS.length];
-  return a;
+  const list = affList(); if(!list) return '';
+  const n = list.length, day = daysBetween('2024-01-01', k), cycle = Math.floor(day / n), pos = day - cycle * n;
+  const key = n + '|' + list[0] + '|' + cycle + '|' + S.settings.affSeed;
+  if(affPerm.key !== key){
+    const shuffle = c => { let x = ((S.settings.affSeed || 1) + c * 7919) >>> 0 || 1;
+      const rnd = () => { x ^= x << 13; x >>>= 0; x ^= x >>> 17; x ^= x << 5; x >>>= 0; return x / 4294967296; };
+      const p = list.map((_, i) => i); for(let i = n - 1; i > 0; i--){ const j = Math.floor(rnd() * (i + 1)); [p[i], p[j]] = [p[j], p[i]]; } return p; };
+    // what came up near the end of the previous round moves to the back of this one, so nothing repeats for weeks
+    const head = Math.floor(n / 3), arrange = (c, depth) => { const p = shuffle(c); if(!depth) return p;
+      const recent = new Set(arrange(c - 1, depth - 1).slice(-head)), early = p.slice(0, head);
+      return [...early.filter(i => !recent.has(i)), ...p.slice(head), ...early.filter(i => recent.has(i))]; };
+    affPerm = {key, p:arrange(cycle, 3)}; }
+  return list[affPerm.p[pos]];
 }
 
 /* ---------- school dates ---------- */
@@ -1076,15 +1336,19 @@ const isDayOff = k => datesOn(k).some(d => d.kind === 'off');
 /* ---------- scheduler ---------- */
 function fixedFor(k){
   const dow = fromKey(k).getDay(), out = [], off = isDayOff(k);
-  if(!off) for(const c of S.classes){
+  if(!off && hasRole('college')) for(const c of S.classes){
     if(!c.days || !c.days.includes(dow)) continue;
     if(c.from && k < c.from) continue; if(c.until && k > c.until) continue;
     out.push({s:toMin(c.start), e:toMin(c.end), cat:'class', label:c.name||'Class', where:(c.where||'').trim(), drive:c.drive ?? null});
   }
+  if(!off && hasRole('hs')){ const sc = S.school;
+    if(sc.days.includes(dow) && !(sc.from && k < sc.from) && !(sc.until && k > sc.until))
+      out.push({s:toMin(sc.start), e:toMin(sc.end), cat:'class', label:'School', where:(sc.where||'').trim(), drive:sc.drive ?? null}); }
   for(const ev of S.events){
-    if(ev.date !== k) continue;
+    if(ev.date !== k || !forMe(ev)) continue;
     let s = toMin(ev.start), e = toMin(ev.end); if(e <= s) e += 1440;
-    out.push({s, e, cat:TYPE_CAT[ev.type]||'fun', label:ev.label||TYPE_LABEL[ev.type]||'Plans', where:(ev.where||'').trim(), drive:ev.drive ?? null});
+    const others = Array.isArray(ev.who) ? ev.who.filter(x => x !== 'me') : [];
+    out.push({s, e, cat:TYPE_CAT[ev.type]||'fun', label:(ev.label||TYPE_LABEL[ev.type]||'Plans') + (others.length ? ' · with ' + others.map(personName).join(' & ') : ''), where:(ev.where||'').trim(), drive:ev.drive ?? null});
   }
   return out.sort((a,b)=>a.s-b.s);
 }
@@ -1129,14 +1393,20 @@ function packNote(fixed, lo, hi, text){ let best = null, ov = 0;
   for(const b of fixed){ const o = Math.min(b.e,hi) - Math.max(b.s,lo); if(o > ov){ ov = o; best = b; } }
   if(best && !best.note) best.note = text; }
 
-/* Weekly study goal from credits (falls back to 1 hr a day with no courses entered). */
-function weeklyGoal(){
-  const credits = S.classes.reduce((t,c)=>t+(parseFloat(c.credits)||0), 0);
-  return {credits, minutes: credits > 0 ? Math.round(credits * S.settings.hoursPerCredit * 60 / 15) * 15 : 7*60};
+/* Weekly study goal: college credits, plus high school homework for each school day.
+   College with no courses entered yet falls back to 1 hr a day; work only means no study time. */
+function weeklyGoal(days){
+  const credits = hasRole('college') ? S.classes.reduce((t,c)=>t+(parseFloat(c.credits)||0), 0) : 0;
+  const hw = hasRole('hs') ? (days || weekDays()).filter(k => S.school.days.includes(fromKey(k).getDay()) && !isDayOff(k)).length * (+S.school.homework || 0) : 0;
+  let minutes = (credits > 0 ? Math.round(credits * S.settings.hoursPerCredit * 60 / 15) * 15 : 0) + hw;
+  if(!minutes && hasRole('college') && !hasRole('hs')) minutes = 7*60;
+  return {credits, hw, minutes};
 }
-function courseQueue(){
+function courseQueue(days){
   const hpc = S.settings.hoursPerCredit;
-  return S.classes.filter(c=>(parseFloat(c.credits)||0) > 0).map(c=>({name:(c.name||'').trim() || 'a course', need:(parseFloat(c.credits)||0)*hpc*60}));
+  const q = hasRole('college') ? S.classes.filter(c=>(parseFloat(c.credits)||0) > 0).map(c=>({name:(c.name||'').trim() || 'a course', need:(parseFloat(c.credits)||0)*hpc*60})) : [];
+  const hw = weeklyGoal(days).hw; if(hw > 0) q.push({name:'Homework', need:hw, hw:true});
+  return q;
 }
 function pickCourse(q, avoid){
   if(!q.length) return null;
@@ -1184,7 +1454,7 @@ function planDay(k, isWalkDay, target, q){
       if(chunk < 45) continue;
       const c = q ? pickCourse(q, last) : null;
       let label = 'Study session · '+hrs(chunk);
-      if(c){ label = 'Study: '+c.name+' · '+hrs(chunk); c.need -= chunk; last = c.name; }
+      if(c){ label = (c.hw ? 'Homework' : 'Study: '+c.name)+' · '+hrs(chunk); c.need -= chunk; last = c.name; }
       place(Ls, Ls+chunk, 'study', label); studied += chunk; done = true; break; }
     if(!done) break;
   }
@@ -1200,7 +1470,7 @@ function planDay(k, isWalkDay, target, q){
 function planWeek(days){
   const wi = walkDayIndex(days);
   const caps = days.map((k,i)=>planDay(k, i===wi, 0, null).capacity);
-  const goal = weeklyGoal().minutes;
+  const goal = weeklyGoal(days).minutes;
   const alloc = days.map(()=>0);
   let remaining = goal;
   for(let round = 0; round < 8 && remaining >= 45; round++){
@@ -1213,7 +1483,7 @@ function planWeek(days){
     const i = days.map((_,j)=>j).filter(j=>alloc[j] > 0 && caps[j] - alloc[j] >= 15).sort((x,y)=>alloc[x]-alloc[y])[0];
     if(i === undefined) break; alloc[i] += 15; remaining -= 15;
   }
-  const q = courseQueue();
+  const q = courseQueue(days);
   const plans = days.map((k,i)=>planDay(k, i===wi, alloc[i], q));
   const planned = plans.reduce((t,p)=>t+p.studied, 0);
   return {plans, goal, planned};
@@ -1229,6 +1499,78 @@ const FLAG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke
 const weekDays = () => Array.from({length:7},(_,i)=>addDays(weekStart,i));
 const rangeText = () => { const d = weekDays(); return niceDate(d[0])+' – '+niceDate(d[6]); };
 
+const chipHtml = x => `<div class="chip ${x.kind}">${x.kind==='deadline'?FLAG:ICON(12)}<span>${x.kind==='off'?'No classes · ':''}${esc(x.label)}</span></div>`;
+const bdHtml = k => birthdaysOn(k).map(b => `<div class="bdchip">🎂 ${b.me ? 'Happy birthday, ' + esc(b.name) + '!' : esc(b.name) + '’s birthday'}</div>`).join('');
+const famItem = e => `<div class="blk fchip" style="--pc:${whoColor(e)}"><b>${fmtRange(toMin(e.start), toMin(e.end))}</b> ${esc(e.label || TYPE_LABEL[e.type] || 'Plans')}<span class="who">${esc(whoText(e))}${e.where ? ' · ' + esc(e.where) : ''}</span></div>`;
+// My blocks and family plans together, in time order
+const dayBlocksHtml = (k, blocks) => [...familyFor(k).map(e => ({s:toMin(e.start), html:famItem(e)})), ...blocks.map(b => ({s:b.s, sleep:b.sleep, html:blkHtml(b)}))]
+  .sort((a, b) => a.s - b.s || (a.sleep ? 1 : 0) - (b.sleep ? 1 : 0)).map(x => x.html).join('');
+const blkHtml = b => `<div class="blk c-${b.cat}${b.conflict?' conflict':''}"><div class="t">${b.sleep?fmt(b.s):fmtRange(b.s,b.e)}</div><div class="l">${esc(b.label)}</div>${b.where && b.cat !== 'drive' ? `<div class="w">📍 <a href="${mapsUrl(b.where)}" target="_blank" rel="noopener">${esc(b.where)}</a></div>` : ''}${b.dir && b.where ? `<div class="w"><a href="${mapsUrl(b.where, true)}" target="_blank" rel="noopener">Directions</a></div>` : ''}${b.note?`<div class="n">${esc(b.note)}</div>`:''}</div>`;
+function choresHtml(k){ const cs = choresFor(k); if(!cs.length) return '';
+  return `<div class="chores"><div class="ch-h">Chores</div>${cs.map(c => `<label class="chore"><input type="checkbox" data-chore="${k}|${c.id}" ${S.choreDone[k + '|' + c.id] ? 'checked' : ''}><span>${esc(c.name.trim())}${(c.who || '').trim() ? ` <small>· ${esc(c.who.trim())}</small>` : ''}</span></label>`).join('')}</div>`; }
+// Blocks for one plan by day, for any set of days (each week is planned as a whole).
+function plansByDay(keys){ const out = {};
+  for(const w of [...new Set(keys.map(k => mondayOf(fromKey(k))))]){ const ds = Array.from({length:7}, (_, i) => addDays(w, i)), {plans} = planWeek(ds); ds.forEach((k, i) => { out[k] = plans[i]; }); }
+  return out; }
+
+function renderRoleUI(){
+  const work = hasRole('work'), school = inSchool(), college = hasRole('college');
+  $('t-add').textContent = work ? 'Add shifts & plans' : 'Add plans';
+  $('goAdd').textContent = work ? '+ Add shifts' : '+ Add plans';
+  [['work', work], ['class', school]].forEach(([v, on]) => ['fType', 'pasteType'].forEach(id => { const o = $(id).querySelector(`option[value=${v}]`); o.hidden = o.disabled = !on; if(!on && $(id).value === v) $(id).value = 'event'; }));
+  $('t-school').textContent = school ? 'School dates & calendars' : 'Dates & calendars';
+  $('photoCard').hidden = !school;
+  $('classesCard').hidden = !college; $('schoolCard').hidden = !hasRole('hs');
+  $('sHpc').closest('label').hidden = !college;
+  $('bannerClasses').hidden = !school; $('bannerClasses').textContent = college ? 'Add my classes' : 'Set my school day';
+  $('bannerShifts').textContent = work ? 'Add shifts' : 'Add plans';
+  const what = [college && 'classes', work && 'work shifts', 'plans'].filter(Boolean);
+  $('bannerMore').textContent = 'Add your ' + (what.length > 1 ? what.slice(0, -1).join(', ') + ' and ' + what.at(-1) : what[0]) + ' and it rebuilds every day around them.';
+}
+function renderSetup(){ const st = S.settings;
+  $('sRoles').innerHTML = picksHtml('sRole', ROLE_PICKS, hasRole);
+  $('sExtras').innerHTML = picksHtml('sExtra', EXTRA_PICKS, v => !!st[v]);
+  $('sBdayM').innerHTML = monthOpts(st.bday); $('sBdayD').innerHTML = dayOpts(st.bday); $('sAff').value = st.affStyle || 'auto'; }
+function renderSchool(target){ const sc = S.school, order = [1,2,3,4,5,6,0];
+  $(target).innerHTML = `<div class="dow" role="group" aria-label="School days" style="margin-bottom:10px">${order.map(d=>`<label><input type="checkbox" data-sday="${d}" ${sc.days.includes(d)?'checked':''} aria-label="${DAYS[d]}"><span>${DOW_SHORT[d]}</span></label>`).join('')}</div>
+    <div class="row"><label class="f">School starts<input type="time" data-sk="start" value="${sc.start}"></label><label class="f">School ends<input type="time" data-sk="end" value="${sc.end}"></label></div>
+    <div class="row"><label class="f">Homework each school day (min)<input type="number" data-sk="homework" min="0" max="300" step="15" value="${sc.homework}"></label><label class="f">Drive time (min)<input type="number" data-sk="drive" min="0" max="240" step="5" value="${sc.drive ?? ''}" placeholder="none"></label></div>
+    <label class="f" style="margin-bottom:0">School name or address (optional)<input type="text" data-sk="where" value="${esc(sc.where||'')}" placeholder="e.g. Lincoln High School"></label>`; }
+function schoolEdit(ev){ const t = ev.target, sc = S.school;
+  if(t.dataset.sday !== undefined){ const d = +t.dataset.sday; sc.days = t.checked ? [...new Set([...sc.days, d])] : sc.days.filter(x=>x!==d); }
+  else if(t.dataset.sk === 'drive') sc.drive = driveVal(t.value);
+  else if(t.dataset.sk === 'homework'){ const n = parseInt(t.value, 10); sc.homework = isNaN(n) ? 0 : Math.max(0, Math.min(300, n)); }
+  else if(t.dataset.sk) sc[t.dataset.sk] = t.value;
+  else return false;
+  save(); return true; }
+function renderFamily(){
+  const st = S.settings, fam = !!st.family, ch = !!st.chores, order = [1,2,3,4,5,6,0];
+  $('t-family').hidden = !fam && !ch;
+  $('t-family').textContent = fam && ch ? 'Family & chores' : fam ? 'Family' : 'Chores';
+  if($('t-family').hidden && $('family').classList.contains('on')) showTab('week');
+  $('peopleCard').hidden = !fam; $('choresCard').hidden = !ch;
+  $('peopleList').innerHTML = S.people.map(p => `<div class="prow" data-pid="${p.id}"><div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+      <div class="row" style="grid-template-columns:minmax(0,1fr) 120px"><label class="f"><span><i class="pdot" style="background:${p.color}"></i>Name</span><input type="text" data-pk="name" value="${esc(p.name||'')}" placeholder="e.g. Sam"></label>
+        <label class="f">Color<select data-pk="color">${PCOLORS.map((c, j) => `<option value="${c}" ${c === p.color ? 'selected' : ''}>${PCOLOR_NAMES[j]}</option>`).join('')}</select></label></div>
+      <div class="row" style="grid-template-columns:minmax(0,1fr) 100px"><label class="f">Birthday · month (optional)<select data-pk="bm">${monthOpts(p.bday)}</select></label><label class="f">Day<select data-pk="bd">${dayOpts(p.bday)}</select></label></div></div>
+      <button class="x" style="background:var(--soft);width:44px;height:44px" data-delperson="${p.id}" aria-label="Remove ${esc(p.name||'this person')}">×</button></div>`).join('') || '<p class="hint">No one added yet.</p>';
+  $('choreList').innerHTML = S.chores.map(c => `<div class="prow" data-chid="${c.id}"><div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+      <div class="row" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr))"><label class="f">Chore<input type="text" data-ck="name" value="${esc(c.name||'')}" placeholder="e.g. Unload the dishwasher"></label>
+        <label class="f">Who does it<input type="text" data-ck="who" list="whoNames" value="${esc(c.who||'')}" placeholder="Anyone"></label></div>
+      <div class="dow" role="group" aria-label="Days it's due">${order.map(d => `<label><input type="checkbox" data-cday="${d}" ${(c.days||[]).includes(d) ? 'checked' : ''} aria-label="${DAYS[d]}"><span>${DOW_SHORT[d]}</span></label>`).join('')}</div></div>
+      <button class="x" style="background:var(--soft);width:44px;height:44px" data-delchore="${c.id}" aria-label="Remove ${esc(c.name||'this chore')}">×</button></div>`).join('') || '<p class="hint">No chores yet.</p>';
+  $('whoNames').innerHTML = [myName(), ...namedPeople().map(p => p.name.trim())].map(n => `<option value="${esc(n)}">`).join('');
+}
+function renderWhoPickers(){
+  const ppl = namedPeople(), on = S.settings.family && ppl.length > 0;
+  $('fWhoRow').hidden = !on; $('pasteWhoL').hidden = !on;
+  const prev = new Set(checkedIn('fWho'));
+  $('fWho').innerHTML = [['me', myName() + ' (me)'], ...ppl.map(p => [p.id, p.name.trim()])].map(([v, l]) => `<label class="pick"><input type="checkbox" value="${v}" ${(prev.size ? prev.has(v) : v === 'me') ? 'checked' : ''}><span>${esc(l)}</span></label>`).join('');
+  const pv = $('pasteWho').value;
+  $('pasteWho').innerHTML = `<option value="me">${esc(myName())} (me)</option>${ppl.map(p => `<option value="${p.id}">${esc(p.name.trim())}</option>`).join('')}<option value="all">Everyone</option>`;
+  if([...$('pasteWho').options].some(o => o.value === pv)) $('pasteWho').value = pv;
+}
+
 function renderAll(){
   applyTheme(S.settings.look, S.settings.color);
   const L = look(), n = S.settings.name.trim();
@@ -1240,15 +1582,19 @@ function renderAll(){
   $('foot').textContent = n ? L.foot.replace('{name}', n) : '';
   const now = new Date(), h = now.getHours();
   $('greeting').textContent = (h<12?'Good morning':h<17?'Good afternoon':'Good evening')+(n?', '+n:'')+' · '+DAYS[now.getDay()]+', '+MONTHS[now.getMonth()]+' '+now.getDate();
-  $('todayAff').textContent = affirmationFor(todayKey());
+  const bday = birthdaysOn(todayKey()).some(b => b.me), aff = bday ? 'Today is all about you.' : affirmationFor(todayKey());
+  if(bday) $('greeting').textContent = 'Happy birthday' + (n ? ', ' + n : '') + '! 🎂 · ' + DAYS[now.getDay()] + ', ' + MONTHS[now.getMonth()] + ' ' + now.getDate();
+  $('todayAff').textContent = aff; $('todayAff').hidden = !aff;
+  renderRoleUI(); renderSetup(); renderSchool('sSchool'); renderFamily(); renderWhoPickers();
   renderComing(); renderWeek(); renderEvents(); renderSettings(); renderClasses('classList'); renderLookPickers(); renderDates();
 }
 function renderComing(){
   const t = todayKey();
   const up = S.dates.filter(d => d.kind !== 'event' || /first day|begin|start|final/i.test(d.label))
     .filter(d => d.start >= t && daysBetween(t, d.start) <= 60).sort((a,b)=>a.start.localeCompare(b.start)).slice(0,3);
-  $('coming').innerHTML = up.length ? '<span>Coming up:</span>' + up.map(d=>{ const n = daysBetween(t, d.start);
-    return `<span><b>${esc(d.label)}</b> · ${niceDate(d.start)} (${n===0?'today':n===1?'tomorrow':'in '+n+' days'})</span>`; }).join('') : '';
+  $('coming').innerHTML = (up.length ? '<span>Coming up:</span>' + up.map(d=>{ const n = daysBetween(t, d.start);
+    return `<span><b>${esc(d.label)}</b> · ${niceDate(d.start)} (${n===0?'today':n===1?'tomorrow':'in '+n+' days'})</span>`; }).join('') : '')
+    + (birthdaysOn(t).some(b => b.me) ? '<button class="btn primary bdbtn" data-bday="1">See my year 🎉</button>' : '');
 }
 // Apple Maps on iPhone, iPad and Mac; Google Maps everywhere else.
 const mapsUrl = (where, directions) => /iPhone|iPad|Macintosh/.test(navigator.userAgent)
@@ -1257,25 +1603,32 @@ const mapsUrl = (where, directions) => /iPhone|iPad|Macintosh/.test(navigator.us
 function renderWeek(){
   $('range').textContent = $('range2').textContent = rangeText();
   document.querySelectorAll('.prange').forEach(x=>x.textContent = rangeText());
-  $('startBanner').hidden = S.classes.length > 0 || S.events.length > 0;
-  $('calBanner').hidden = !$('startBanner').hidden || S.dates.length > 0 || S.events.some(e => e.source === 'ics') || !!S.settings.calBannerOff;
-  $('legend').innerHTML = Object.entries(CAT_NAMES).map(([k,v])=>`<span><i class="c-${k}"></i>${v}</span>`).join('');
-  const days = weekDays(), today = todayKey(), {plans, goal, planned} = planWeek(days), wg = weeklyGoal();
+  $('startBanner').hidden = S.classes.length > 0 || S.events.length > 0 || hasRole('hs');
+  $('calBanner').hidden = !$('startBanner').hidden || !inSchool() || S.dates.length > 0 || S.events.some(e => e.source === 'ics') || !!S.settings.calBannerOff;
+  const days = weekDays(), today = todayKey(), {plans, goal, planned} = planWeek(days), wg = weeklyGoal(days);
+  const word = wg.credits || !wg.hw ? 'study' : 'homework';
+  const names = {...CAT_NAMES, class: hasRole('college') ? 'Class' : 'School', study: word === 'study' ? 'Study' : 'Homework'};
+  if(!hasRole('work') && !S.events.some(e => e.type === 'work')) delete names.work;
+  if(!goal) delete names.study;
+  if(!inSchool() && !S.events.some(e => e.type === 'class')) delete names.class;
+  $('legend').innerHTML = Object.entries(names).map(([k,v])=>`<span><i class="c-${k}"></i>${v}</span>`).join('');
   const pct = goal ? Math.min(100, Math.round(planned/goal*100)) : 0;
-  $('studybar').innerHTML = `<span class="lbl">${hrs(planned)} of study planned this week</span>
-    <span class="meter" role="img" aria-label="${pct}% of study goal planned"><i style="width:${pct}%"></i></span>
-    <span class="sub">${wg.credits ? `Goal: ${hrs(goal)} (${wg.credits} credits × ${S.settings.hoursPerCredit} hrs)` : 'Goal: 1 hr a day. Add your courses and credits for a real goal.'}${planned + 45 <= goal ? ` · ${hrs(goal-planned)} short: a busy week, so grab extra time where you can` : ''}</span>`;
+  $('studybar').hidden = !goal;
+  $('studybar').innerHTML = `<span class="lbl">${hrs(planned)} of ${word} planned this week</span>
+    <span class="meter" role="img" aria-label="${pct}% of ${word} goal planned"><i style="width:${pct}%"></i></span>
+    <span class="sub">${wg.credits ? `Goal: ${hrs(goal)} (${wg.credits} credits × ${S.settings.hoursPerCredit} hrs${wg.hw ? ' + ' + hrs(wg.hw) + ' homework' : ''})` : wg.hw ? `Goal: ${hrs(goal)} (${hrs(S.school.homework)} each school day)` : 'Goal: 1 hr a day. Add your courses and credits for a real goal.'}${planned + 45 <= goal ? ` · ${hrs(goal-planned)} short: a busy week, so grab extra time where you can` : ''}</span>`;
   $('grid').innerHTML = days.map((k,i)=>{
     const d = fromKey(k), p = plans[i];
-    const chips = datesOn(k).map(x=>`<div class="chip ${x.kind}">${x.kind==='deadline'?FLAG:ICON(12)}<span>${x.kind==='off'?'No classes · ':''}${esc(x.label)}</span></div>`).join('');
-    const sum = p.studied ? `${ICON(12)} ${hrs(p.studied)} of study` : 'no study today · rest up';
-    const note = S.notes[k];
+    const chips = datesOn(k).map(chipHtml).join('');
+    const sum = p.studied ? `${ICON(12)} ${hrs(p.studied)} of ${word}` : goal ? `no ${word} today · rest up` : '';
+    const note = S.notes[k], aff = affirmationFor(k);
     return `<article class="day${k===today?' today':''}" id="d-${k}">
       <div class="dhead"><h3 class="display">${DAYS[d.getDay()]}</h3><div class="date">${MONTHS[d.getMonth()]} ${d.getDate()}</div>
       ${k===today?'<span class="today-tag">today</span>':''}
+      ${bdHtml(k)}
       ${chips?`<div class="daychips">${chips}</div>`:''}
-      <div class="aff">${ICON()}${esc(affirmationFor(k))}</div></div>
-      <div class="dblocks">${p.blocks.map(b=>`<div class="blk c-${b.cat}${b.conflict?' conflict':''}"><div class="t">${b.sleep?fmt(b.s):fmtRange(b.s,b.e)}</div><div class="l">${esc(b.label)}</div>${b.where && b.cat !== 'drive' ? `<div class="w">📍 <a href="${mapsUrl(b.where)}" target="_blank" rel="noopener">${esc(b.where)}</a></div>` : ''}${b.dir && b.where ? `<div class="w"><a href="${mapsUrl(b.where, true)}" target="_blank" rel="noopener">Directions</a></div>` : ''}${b.note?`<div class="n">${esc(b.note)}</div>`:''}</div>`).join('')}</div>
+      ${aff ? `<div class="aff">${ICON()}${esc(aff)}</div>` : ''}</div>
+      <div class="dblocks">${dayBlocksHtml(k, p.blocks)}${choresHtml(k)}</div>
       <div class="daysum">${sum}</div>
       <div class="dnotes">${note?`<img src="${note}" alt="Handwritten note for ${DAYS[d.getDay()]}">`:''}<div class="lines"></div>
         <button class="notebtn" data-note="${k}">${PEN}${note?'Edit my note':'Write a note'}</button></div></article>`;
@@ -1284,7 +1637,7 @@ function renderWeek(){
 function renderEvents(){
   const days = weekDays();
   const evs = S.events.filter(e=>days.includes(e.date)).sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
-  $('evList').innerHTML = evs.length ? evs.map(e=>`<li class="c-${TYPE_CAT[e.type]||'fun'}"><span class="grow"><strong>${DOW_SHORT[fromKey(e.date).getDay()]} ${niceDate(e.date)}</strong> · ${fmtRange(toMin(e.start),toMin(e.end))}<br>${esc(e.label||TYPE_LABEL[e.type])}${e.where ? ' · '+esc(e.where) : ''}${e.drive ? ' · '+hrs(e.drive)+' drive' : ''}</span>
+  $('evList').innerHTML = evs.length ? evs.map(e=>`<li class="c-${TYPE_CAT[e.type]||'fun'}"${forMe(e) ? '' : ` style="border-left:5px solid ${whoColor(e)}"`}><span class="grow"><strong>${DOW_SHORT[fromKey(e.date).getDay()]} ${niceDate(e.date)}</strong> · ${fmtRange(toMin(e.start),toMin(e.end))}<br>${esc(e.label||TYPE_LABEL[e.type])}${e.where ? ' · '+esc(e.where) : ''}${e.drive ? ' · '+hrs(e.drive)+' drive' : ''}${Array.isArray(e.who) && (e.who.length > 1 || !forMe(e)) ? ' · <em>'+esc(whoText(e))+'</em>' : ''}</span>
       <button class="x" data-del="${e.id}" aria-label="Remove ${esc(e.label||'item')} on ${niceDate(e.date)}">×</button></li>`).join('')
     : '<li style="color:var(--muted)">Nothing added for this week yet.</li>';
 }
@@ -1330,10 +1683,14 @@ function renderDates(){
 }
 
 /* ---------- welcome ---------- */
-let W = {look:'bloom', color:'rose'};
-function renderWelcome(){ $('wLooks').innerHTML = lookCards('wLook', W.look); $('wSwatches').innerHTML = swatches('wColor', W.color); applyTheme(W.look, W.color); renderClasses('wClassList'); }
+let W = {look:'bloom', color:'rose', roles:[], extras:{}};
+function renderWelcomeRoles(){ const has = r => W.roles.includes(r);
+  $('wHsBox').hidden = !has('hs'); $('wCollegeBox').hidden = !has('college'); $('wCalStep').hidden = !has('hs') && !has('college'); }
+function renderWelcome(){ $('wLooks').innerHTML = lookCards('wLook', W.look); $('wSwatches').innerHTML = swatches('wColor', W.color); applyTheme(W.look, W.color); renderClasses('wClassList');
+  $('wRoles').innerHTML = picksHtml('wRole', ROLE_PICKS, v => W.roles.includes(v)); $('wExtras').innerHTML = picksHtml('wExtra', EXTRA_PICKS, v => !!W.extras[v]);
+  $('wBdayM').innerHTML = monthOpts(S.settings.bday); $('wBdayD').innerHTML = dayOpts(S.settings.bday); renderSchool('wSchool'); renderWelcomeRoles(); }
 function openWelcome(){
-  W = {look:S.settings.look, color:S.settings.color};
+  W = {look:S.settings.look, color:S.settings.color, roles:[...(S.settings.roles || [])], extras:{family:S.settings.family, chores:S.settings.chores, startToday:S.settings.startToday}};
   if(!S.classes.length) S.classes.push(newCourse());
   $('wNameInput').value = S.settings.name; $('wWake').value = S.settings.wake; $('wReady').value = S.settings.readyMins;
   $('wBed').value = S.settings.bedtime; $('wSleep').value = S.settings.sleepHrs;
@@ -1343,12 +1700,20 @@ $('wNameInput').addEventListener('input', ()=>{ const v = $('wNameInput').value.
 $('wLooks').addEventListener('change', e=>{ W.look = e.target.value; W.color = LOOKS[W.look].defaultColor; $('wLooks').innerHTML = lookCards('wLook', W.look); $('wSwatches').innerHTML = swatches('wColor', W.color); applyTheme(W.look, W.color); });
 $('wSwatches').addEventListener('change', e=>{ W.color = e.target.value; applyTheme(W.look, W.color); });
 $('wAddClass').onclick = ()=>{ S.classes.push(newCourse()); renderClasses('wClassList'); };
+$('wRoles').addEventListener('change', ()=>{ W.roles = checkedIn('wRoles'); renderWelcomeRoles(); });
+$('wExtras').addEventListener('change', e=>{ W.extras[e.target.value] = e.target.checked; });
+$('wSchool').addEventListener('change', schoolEdit);
 function finishWelcome(tab){
   const st = S.settings, num = (id, d) => { const n = parseFloat($(id).value); return isNaN(n) ? d : n; };
   st.name = $('wNameInput').value.trim(); st.look = W.look; st.color = W.color;
   st.wake = $('wWake').value || st.wake; st.bedtime = $('wBed').value || st.bedtime;
   st.readyMins = num('wReady', st.readyMins); st.sleepHrs = num('wSleep', st.sleepHrs); st.onboarded = true;
+  st.roles = W.roles; Object.assign(st, {family:!!W.extras.family, chores:!!W.extras.chores, startToday:!!W.extras.startToday});
+  st.bday = bdayFrom('wBdayM', 'wBdayD');
+  if(st.family && !S.people.length) S.people.push(newPerson());
+  if(st.chores && !S.chores.length) S.chores.push(newChore());
   S.classes = S.classes.filter(c => (c.name||'').trim() || c.days.length);
+  if(fullBday(st.bday)) scheduleBday(true);
   save(); $('welcome').hidden = true; showTab(tab); renderAll(); window.scrollTo(0,0);
 }
 $('wGo').onclick = ()=>finishWelcome('week');
@@ -1358,7 +1723,7 @@ const DOW_RE = /\b(sun|mon|tue|tues|wed|thu|thur|thurs|fri|sat)(day|nesday|rsday
 const DOW_MAP = {sun:0,mon:1,tue:2,tues:2,wed:3,thu:4,thur:4,thurs:4,fri:5,sat:6};
 const DATE_RE = /\b(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\b/;
 const TIME_RE = /(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?|a|p)?\s*(?:-|–|—|to|until|til)\s*(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?|a|p)?(?![\d:])/i;
-function parseLines(text, type){
+function parseLines(text, type, who){
   const days = weekDays(); let current = null; const added = [], skipped = [];
   for(const raw of text.split(/\n+/)){
     let line = raw.trim(); if(!line) continue; let date = null;
@@ -1382,6 +1747,7 @@ function parseLines(text, type){
     let label = line.replace(tm[0],' ').replace(/[|•·,;:()\-–—]+/g,' ').replace(/\s+/g,' ').trim();
     if(/^(schedule|barista schedule)$/i.test(label)) label = '';
     const ev = {id:uid(), date, start:toHHMM(s24*60+sm), end:toHHMM(e24*60+em), type, label: label || TYPE_LABEL[type]};
+    if(who && !(who.length === 1 && who[0] === 'me')) ev.who = who;
     if(!S.events.some(x=>x.date===ev.date && x.start===ev.start && x.end===ev.end && x.type===ev.type)){ S.events.push(ev); added.push(ev); }
   }
   return {added, skipped};
@@ -1593,20 +1959,12 @@ $('calBannerOff').onclick = ()=>{ S.settings.calBannerOff = true; save(); render
 const icsEsc = s => String(s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
 const icsLocal = (k, m) => k.replace(/-/g,'') + 'T' + toHHMM(m).replace(':','') + '00';
 if($('icsOut')) $('icsOut').onclick = ()=>{
-  const days = weekDays(), {plans} = planWeek(days), stamp = new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
-  const lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Waypoint Ink//Schedule Compass//EN','CALSCALE:GREGORIAN','X-WR-CALNAME:'+icsEsc((S.settings.name||'My')+"'s Week")];
-  days.forEach((k,i)=>plans[i].blocks.forEach((b,j)=>{
-    if(!['class','work','study','fun','appt'].includes(b.cat) || b.sleep) return;
-    lines.push('BEGIN:VEVENT','UID:ww-'+k+'-'+j+'-'+b.s+'@schedulecompass','DTSTAMP:'+stamp,'DTSTART:'+icsLocal(k,b.s),'DTEND:'+icsLocal(k,Math.min(b.e,1439)),'SUMMARY:'+icsEsc(b.label),...(b.where?['LOCATION:'+icsEsc(b.where)]:[]),'END:VEVENT');
-  }));
-  S.dates.filter(d=>d.source !== 'ics').forEach(d=>lines.push('BEGIN:VEVENT','UID:ww-date-'+d.id+'@schedulecompass','DTSTAMP:'+stamp,'DTSTART;VALUE=DATE:'+d.start.replace(/-/g,''),'DTEND;VALUE=DATE:'+addDays(d.end||d.start,1).replace(/-/g,''),'SUMMARY:'+icsEsc((d.kind==='off'?'No classes: ':'')+d.label),'END:VEVENT'));
-  lines.push('END:VCALENDAR');
-  saveTextFile('my-week-'+weekStart+'.ics', lines.join('\r\n'), 'text/calendar', $('icsMsg'),
+  saveTextFile('my-week-'+weekStart+'.ics', icsFor(weekDays(), 'me'), 'text/calendar', $('icsMsg'),
     'Saved to your downloads. Now import it into Google Calendar or Outlook.', 'Now open it in Calendar, Google Calendar or Outlook.');
 };
 
 /* ---------- wiring ---------- */
-const TABS = ['week','add','school','routine'];
+const TABS = ['week','add','school','family','routine'];
 function showTab(n){ TABS.forEach(x=>{ $(x).classList.toggle('on', x===n); $('t-'+x).setAttribute('aria-selected', x===n); }); }
 TABS.forEach(n=>$('t-'+n).addEventListener('click',()=>showTab(n)));
 $('goAdd').onclick = $('bannerShifts').onclick = ()=>showTab('add');
@@ -1623,43 +1981,83 @@ function openPrint(){
 }
 $('cancelPrint').onclick = ()=>{ $('printPanel').hidden = true; };
 
-/* ---------- share by text or email ---------- */
-// A plain-text version of a day or the week: classes, work, study, plans and school dates (meals and routines optional).
-function shareText(what, all){
-  const days = weekDays(), {plans} = planWeek(days), n = S.settings.name.trim();
-  const keep = b => all || (!b.sleep && b.cat !== 'routine' && b.cat !== 'meal');
-  const dayLines = i => {
-    const k = days[i], lines = [];
-    datesOn(k).forEach(d => lines.push('• ' + (d.kind === 'off' ? 'No classes: ' : '') + d.label));
-    plans[i].blocks.filter(keep).forEach(b => lines.push(b.sleep ? '• ' + b.label + ' from ' + fmt(b.s) : '• ' + fmtRange(b.s, b.e) + '  ' + b.label + (b.where && b.cat !== 'drive' ? ' @ ' + b.where : '')));
-    return lines.length ? lines : ['• Nothing scheduled'];
-  };
-  const day = i => { const d = fromKey(days[i]); return DAYS[d.getDay()] + ', ' + niceDate(days[i]); };
-  if(what === 'week'){
-    const out = [(n ? n + "'s week" : 'My week') + ' · ' + rangeText()];
-    days.forEach((k, i) => out.push('', day(i), ...dayLines(i)));
-    return out.concat('', 'Sent from Schedule Compass').join('\n');
+/* ---------- share: text, email, copy, share sheet, calendar file, print ---------- */
+const shareDays = what => what === 'week' ? weekDays() : what === 'month' ? Array.from({length:28}, (_, i) => addDays(weekStart, i)) : [weekDays()[+what]];
+// who: 'all' = everyone, 'me' = just my plan, or a family member's id
+const showsMine = who => who === 'all' || who === 'me';
+const eventFor = (e, who) => who === 'all' ? true : who === 'me' ? forMe(e) : (e.who || []).includes(who);
+// Everything on one day for a share, in time order: [{s, e, text, where}] (s = -1 for all-day things, 9999 for chores)
+function shareItems(k, plan, all, who){
+  const out = [], keep = b => all || (!b.sleep && b.cat !== 'routine' && b.cat !== 'meal');
+  birthdaysOn(k).forEach(b => out.push({s:-1, text:'🎂 ' + b.name + '’s birthday'}));
+  if(showsMine(who)){
+    datesOn(k).forEach(d => out.push({s:-1, text:(d.kind === 'off' ? 'No classes: ' : '') + d.label}));
+    plan.blocks.filter(keep).forEach(b => out.push({s:b.s, e:b.e, sleep:b.sleep, cat:b.cat, text:b.label, where:b.cat !== 'drive' ? b.where : ''}));
   }
-  const i = +what;
-  return [(n ? n + "'s day" : 'My day') + ' · ' + day(i), ...dayLines(i), '', 'Sent from Schedule Compass'].join('\n');
+  S.events.filter(e => e.date === k && (who === 'me' ? false : showsMine(who) ? !forMe(e) : eventFor(e, who))).forEach(e => {
+    let s = toMin(e.start), en = toMin(e.end); if(en <= s) en += 1440;
+    out.push({s, e:en, cat:TYPE_CAT[e.type] || 'fun', text:(e.label || TYPE_LABEL[e.type] || 'Plans') + (who === 'all' || who === 'me' ? ' (' + whoText(e) + ')' : ''), where:e.where}); });
+  choresFor(k).filter(c => who === 'all' ? true : who === 'me' ? isMine(c) : (c.who || '').trim().toLowerCase() === personName(who).toLowerCase())
+    .forEach(c => out.push({s:9999, chore:true, text:c.name.trim() + (who === 'all' && (c.who || '').trim() ? ' (' + c.who.trim() + ')' : '')}));
+  return out.sort((a, b) => a.s - b.s);
 }
-function shareTitle(){ const w = $('shWhat'); return w.options[w.selectedIndex].text.replace(/^Today · /, 'Today, '); }
-function fillShare(){ $('shText').value = shareText($('shWhat').value, $('shAll').checked); $('shMsg').textContent = ''; }
+function shareHeading(what, who){
+  const n = S.settings.name.trim(), whose = who === 'all' && S.settings.family && namedPeople().length ? 'Family' : who === 'me' || who === 'all' ? (n ? n + '’s' : 'My') : personName(who) + '’s';
+  const days = shareDays(what), span = what === 'week' ? ' week · ' + rangeText() : what === 'month' ? ' next four weeks · ' + niceDate(days[0]) + ' – ' + niceDate(days[27]) : ' day · ' + DAYS[fromKey(days[0]).getDay()] + ', ' + niceDate(days[0]);
+  return whose === 'Family' ? 'Family schedule · ' + span.replace(/^[^·]*· /, '') : whose + span;
+}
+function shareText(what, all, who = 'all'){
+  const days = shareDays(what), P = plansByDay(days), out = [shareHeading(what, who)];
+  days.forEach(k => { const d = fromKey(k), items = shareItems(k, P[k], all, who);
+    if(what === 'month' && !items.length) return;
+    out.push('', DAYS[d.getDay()] + ', ' + niceDate(k));
+    if(!items.length) out.push('• Nothing scheduled');
+    items.forEach(x => out.push(x.chore ? '• ☐ ' + x.text : x.s < 0 ? '• ' + x.text : x.sleep ? '• ' + x.text + ' from ' + fmt(x.s) : '• ' + fmtRange(x.s, x.e) + '  ' + x.text + (x.where ? ' @ ' + x.where : '')));
+  });
+  return out.concat('', 'Sent from Schedule Compass').join('\n');
+}
+// The same days as a calendar file for Apple Calendar, Google Calendar or Outlook (timed things plus all-day school dates and birthdays).
+function icsFor(days, who){
+  const P = plansByDay(days), stamp = new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,''), n = S.settings.name.trim();
+  const lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Waypoint Ink//Schedule Compass//EN','CALSCALE:GREGORIAN','X-WR-CALNAME:'+icsEsc(who === 'me' || who === 'all' ? (n || 'My')+"'s schedule" : personName(who)+"'s schedule")];
+  const allDay = (id, k, end, text) => lines.push('BEGIN:VEVENT','UID:sc-'+id+'@schedulecompass','DTSTAMP:'+stamp,'DTSTART;VALUE=DATE:'+k.replace(/-/g,''),'DTEND;VALUE=DATE:'+addDays(end || k, 1).replace(/-/g,''),'SUMMARY:'+icsEsc(text),'END:VEVENT');
+  days.forEach(k => {
+    shareItems(k, P[k], false, who).forEach((x, j) => {
+      if(x.chore || x.s < 0 || x.sleep || !['class','work','study','fun','appt'].includes(x.cat)) return;
+      const endK = x.e > 1440 ? addDays(k, 1) : k, endM = x.e > 1440 ? x.e - 1440 : Math.min(x.e, 1439);
+      lines.push('BEGIN:VEVENT','UID:sc-'+k+'-'+x.s+'-'+j+'@schedulecompass','DTSTAMP:'+stamp,'DTSTART:'+icsLocal(k,x.s),'DTEND:'+icsLocal(endK,endM),'SUMMARY:'+icsEsc(x.text),...(x.where?['LOCATION:'+icsEsc(x.where)]:[]),'END:VEVENT');
+    });
+    if(showsMine(who)) S.dates.filter(d => d.start === k && d.source !== 'ics').forEach(d => allDay('date-'+d.id, d.start, d.end, (d.kind==='off'?'No classes: ':'')+d.label));
+    birthdaysOn(k).forEach((b, j) => allDay('bday-'+k+'-'+j, k, null, '🎂 '+b.name+'’s birthday'));
+  });
+  lines.push('END:VCALENDAR');
+  return lines.join('\r\n');
+}
+function shareTitle(){ return shareHeading($('shWhat').value, $('shWho').value || 'all'); }
+function fillShare(){ $('shText').value = shareText($('shWhat').value, $('shAll').checked, $('shWho').value || 'all'); $('shMsg').textContent = ''; }
 function openShare(){
-  const days = weekDays(), t = days.indexOf(todayKey());
+  const days = weekDays(), t = days.indexOf(todayKey()), ppl = namedPeople(), fam = S.settings.family && ppl.length > 0;
   $('shWhat').innerHTML = '<option value="week">The whole week · ' + esc(rangeText()) + '</option>' +
-    days.map((k, i) => { const d = fromKey(k); return '<option value="' + i + '">' + (i === t ? 'Today · ' : '') + DAYS[d.getDay()] + ', ' + niceDate(k) + '</option>'; }).join('');
+    days.map((k, i) => { const d = fromKey(k); return '<option value="' + i + '">' + (i === t ? 'Today · ' : '') + DAYS[d.getDay()] + ', ' + niceDate(k) + '</option>'; }).join('') +
+    '<option value="month">The next four weeks · from ' + esc(niceDate(weekStart)) + '</option>';
   $('shWhat').value = t >= 0 ? String(t) : 'week';
+  $('shWhoL').hidden = !fam;
+  $('shWho').innerHTML = '<option value="all">Everyone</option><option value="me">Just me</option>' + ppl.map(p => `<option value="${p.id}">Just ${esc(p.name.trim())}</option>`).join('');
+  $('shWho').value = 'all';
   $('shMore').hidden = !(IS_NATIVE && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) && !navigator.share;
   $('printPanel').hidden = true; fillShare(); $('sharePanel').hidden = false; $('sharePanel').scrollIntoView({block:'nearest'});
 }
 const openLink = url => { const a = document.createElement('a'); a.href = url; document.body.appendChild(a); a.click(); a.remove(); };
 $('share').onclick = openShare;
-$('shWhat').onchange = $('shAll').onchange = fillShare;
+$('shWhat').onchange = $('shAll').onchange = $('shWho').onchange = fillShare;
+$('shIcs').onclick = ()=>{ const what = $('shWhat').value, who = $('shWho').value || 'all', days = shareDays(what);
+  saveTextFile('schedule-'+days[0]+'.ics', icsFor(days, who), 'text/calendar', $('shMsg'),
+    'Saved to your downloads. Open it to add it to Apple Calendar, Google Calendar or Outlook.', 'Pick Calendar (or Mail or Messages to send it to someone).'); };
+$('shPrint').onclick = ()=>{ $('sharePanel').hidden = true; openPrint(); };
 $('shCancel').onclick = ()=>{ $('sharePanel').hidden = true; };
 // "sms:?&body=" opens Messages with the text filled in on iPhone and Android; "mailto:" opens the mail app.
 $('shText1').onclick = ()=>openLink('sms:?&body=' + encodeURIComponent($('shText').value));
-$('shEmail').onclick = ()=>openLink('mailto:?subject=' + encodeURIComponent((S.settings.name.trim() ? S.settings.name.trim() + "'s schedule" : 'My schedule') + ' · ' + shareTitle()) + '&body=' + encodeURIComponent($('shText').value));
+$('shEmail').onclick = ()=>openLink('mailto:?subject=' + encodeURIComponent(shareTitle()) + '&body=' + encodeURIComponent($('shText').value));
 $('shCopy').onclick = async ()=>{
   const t = $('shText').value;
   try{ await navigator.clipboard.writeText(t); }
@@ -1693,6 +2091,141 @@ $('doPrint').onclick = ()=>{
     try{ window.print(); }catch(e){}
   }, 80);
 };
+
+/* ---------- Today view: one day at a time ---------- */
+let tvDay = null;
+// Free-time blocks are left out so the day stays short and simple.
+const dayItems = (k, plan) => { const L = look(); return plan.blocks.filter(b => !(b.cat === 'meal' && (b.label === L.me || b.label === L.rest))); };
+function renderToday(){
+  const k = tvDay, d = fromKey(k), t = todayKey(), plan = plansByDay([k])[k], aff = birthdaysOn(k).some(b => b.me) ? 'Today is all about you.' : affirmationFor(k);
+  $('tvKick').textContent = k === t ? 'Today' : k === addDays(t, 1) ? 'Tomorrow' : k === addDays(t, -1) ? 'Yesterday' : DAYS[d.getDay()];
+  $('tvDate').textContent = DAYS[d.getDay()] + ', ' + niceDate(k);
+  $('tvAff').textContent = aff; $('tvAff').hidden = !aff;
+  $('tvBody').innerHTML = `<div class="tvlist">${bdHtml(k)}${datesOn(k).map(chipHtml).join('')}${dayBlocksHtml(k, dayItems(k, plan))}${choresHtml(k)}</div>`;
+  $('tvMsg').textContent = '';
+}
+function openToday(k){ tvDay = k || todayKey(); renderToday(); $('todayView').hidden = false; document.body.style.overflow = 'hidden'; $('tvClose').focus(); }
+function closeToday(){ $('todayView').hidden = true; document.body.style.overflow = ''; }
+$('openToday').onclick = ()=>openToday(todayKey());
+$('tvPrev').onclick = ()=>{ tvDay = addDays(tvDay, -1); renderToday(); };
+$('tvNext').onclick = ()=>{ tvDay = addDays(tvDay, 1); renderToday(); };
+$('tvClose').onclick = ()=>{ closeToday(); weekStart = mondayOf(fromKey(tvDay)); renderWeek(); renderEvents(); showTab('week'); };
+$('todayView').addEventListener('keydown', e=>{ if(e.key === 'Escape') closeToday(); });
+
+/* A phone-sized picture of one day for the Lock Screen. The top is left clear for the clock. */
+function wrapText(x, text, maxW){ const words = String(text).split(/\s+/), lines = []; let cur = '';
+  for(const w of words){ const t = cur ? cur + ' ' + w : w; if(x.measureText(t).width > maxW && cur){ lines.push(cur); cur = w; } else cur = t; }
+  if(cur) lines.push(cur); return lines; }
+function fitText(x, text, maxW){ if(x.measureText(text).width <= maxW) return text; let t = text; while(t.length > 1 && x.measureText(t + '…').width > maxW) t = t.slice(0, -1); return t.trimEnd() + '…'; }
+async function wallpaperPng(k){
+  const W = 1179, H = 2556, c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+  const cs = getComputedStyle(document.documentElement), v = n => cs.getPropertyValue(n).trim();
+  try{ await document.fonts.ready; }catch(e){}
+  const disp = v('--display'), sans = v('--sans'), dSt = v('--display-style') === 'italic' ? 'italic ' : '', dW = v('--display-weight') || '600', upper = v('--display-case') === 'uppercase';
+  x.fillStyle = v('--paper') || '#fff'; x.fillRect(0, 0, W, H);
+  x.fillStyle = v('--soft'); x.beginPath(); x.arc(W - 40, 820, 300, 0, Math.PI * 2); x.fill();
+  const d = fromKey(k), plan = plansByDay([k])[k], L = 90, R = W - 90;
+  let y = 930;
+  x.fillStyle = v('--muted'); x.font = `600 40px ${sans}`; x.fillText(DAYS[d.getDay()].toUpperCase(), L, y);
+  y += 104; x.fillStyle = v('--accent-deep'); x.font = `${dSt}${dW} 108px ${disp}`; x.fillText(upper ? niceDate(k).toUpperCase() : niceDate(k), L, y);
+  const aff = birthdaysOn(k).some(b => b.me) ? 'Happy birthday! Today is all about you.' : affirmationFor(k);
+  if(aff){ y += 24; x.font = `${dSt}${dW} 56px ${disp}`; for(const line of wrapText(x, aff, R - L).slice(0, 3)){ y += 70; x.fillText(line, L, y); } }
+  y += 54; x.strokeStyle = v('--line'); x.lineWidth = 4; x.beginPath(); x.moveTo(L, y); x.lineTo(R, y); x.stroke(); y += 10;
+  const rows = [];
+  birthdaysOn(k).forEach(b => rows.push({s:-2, t:'🎂', l:b.me ? 'My birthday' : b.name + '’s birthday'}));
+  datesOn(k).forEach(dt => rows.push({s:-1, t:'', l:(dt.kind === 'off' ? 'No classes · ' : '') + dt.label}));
+  dayItems(k, plan).filter(b => b.cat !== 'meal').forEach(b => rows.push({s:b.s, t:b.sleep ? fmt(b.s) : fmtRange(b.s, b.e), l:b.label, cat:b.cat}));
+  familyFor(k).forEach(e => rows.push({s:toMin(e.start), t:fmtRange(toMin(e.start), toMin(e.end)), l:(e.label || 'Plans') + ' · ' + whoText(e), color:whoColor(e)}));
+  choresFor(k).forEach(c => rows.push({s:9999, t:S.choreDone[k + '|' + c.id] ? '☑' : '☐', l:c.name.trim() + ((c.who || '').trim() ? ' · ' + c.who.trim() : '')}));
+  rows.sort((a, b) => a.s - b.s);
+  const max = Math.floor((H - 170 - y) / 78);
+  rows.slice(0, rows.length > max ? max - 1 : max).forEach(r => {
+    y += 78;
+    if(r.cat && r.cat !== 'routine'){ x.fillStyle = v('--' + (r.cat === 'drive' ? 'routine' : r.cat) + '-bg') || v('--soft'); x.fillRect(L - 24, y - 50, 10, 64); }
+    if(r.color && r.color.startsWith('#')){ x.fillStyle = r.color; x.fillRect(L - 24, y - 50, 10, 64); }
+    x.font = `500 34px ${sans}`; x.fillStyle = v('--muted'); x.fillText(fitText(x, r.t, 300), L, y);
+    x.font = `500 44px ${sans}`; x.fillStyle = v('--ink'); x.fillText(fitText(x, r.l, R - L - 320), L + 320, y);
+  });
+  if(rows.length > max){ y += 78; x.font = `500 38px ${sans}`; x.fillStyle = v('--muted'); x.fillText('+ ' + (rows.length - max + 1) + ' more in Schedule Compass', L, y); }
+  return c.toDataURL('image/png');
+}
+async function saveWallpaper(){
+  const k = tvDay, name = 'my-day-' + k + '.png', Pl = IS_NATIVE && window.Capacitor.Plugins;
+  $('tvMsg').textContent = 'Making your picture…';
+  try{
+    const url = await wallpaperPng(k);
+    if(Pl && Pl.Filesystem && Pl.Share){
+      const w = await Pl.Filesystem.writeFile({path:name, data:url.split(',')[1], directory:'CACHE'});
+      $('tvMsg').textContent = 'Tap “Save Image,” then set it as your wallpaper from Photos.';
+      await Pl.Share.share({title:'My day', url:w.uri}); return;
+    }
+    const blob = await (await fetch(url)).blob(), file = new File([blob], name, {type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){ $('tvMsg').textContent = 'Tap “Save Image,” then set it as your wallpaper from Photos.'; await navigator.share({files:[file], title:'My day'}); return; }
+    const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    $('tvMsg').textContent = 'Saved to your downloads. Set it as your phone background from Photos.';
+  }catch(e){ $('tvMsg').textContent = /cancel|abort/i.test(String(e && (e.message || e.name))) ? '' : "Couldn't make the picture. Try again."; }
+}
+$('tvWall').onclick = saveWallpaper;
+
+/* ---------- birthday: a look back at the year ---------- */
+const BDAY_LINES = ['Here’s to your best year yet.', 'You did all of that. Be proud of yourself.', 'Every one of those days counts. Happy birthday!',
+  'The world is better with you in it.', 'Celebrate yourself today. You’ve earned it.', 'Look how far you’ve come. Can’t wait to see this year.'];
+// From this day last year (or the first day you used the planner, if later) through yesterday.
+function yearStats(k){
+  const d = fromKey(k), yearAgo = keyOf(new Date(d.getFullYear() - 1, d.getMonth(), d.getDate(), 12)), since = S.settings.since || yearAgo;
+  const from = since > yearAgo ? since : yearAgo, to = addDays(k, -1), keys = [], L = look(), inR = x => x >= from && x <= to;
+  for(let x = from; x <= to && keys.length < 400; x = addDays(x, 1)) keys.push(x);
+  let classes = 0, school = 0, study = 0, walks = 0;
+  if(keys.length){ const P = plansByDay(keys);
+    keys.forEach(x => P[x].blocks.forEach(b => { if(b.cat === 'class'){ if(b.label === 'School') school++; else classes++; } else if(b.cat === 'study') study += b.e - b.s; else if(b.cat === 'fun' && b.label === L.walk) walks++; })); }
+  const shifts = S.events.filter(e => e.type === 'work' && forMe(e) && inR(e.date));
+  const shiftMin = shifts.reduce((t, e) => { const a = toMin(e.start); let b = toMin(e.end); if(b <= a) b += 1440; return t + b - a; }, 0);
+  return {days:keys.length, classes, school, study, walks, shifts:shifts.length, shiftMin,
+    plans:S.events.filter(e => ['event','appt','cal'].includes(e.type) && inR(e.date)).length,
+    chores:Object.keys(S.choreDone).filter(x => inR(x.slice(0, 10))).length,
+    notes:Object.keys(S.notes).filter(inR).length,
+    deadlines:S.dates.filter(x => x.kind === 'deadline' && inR(x.start)).length};
+}
+function yearHighlights(st){
+  const n = (v, one, many) => `<b>${v}</b> ${v === 1 ? one : many}`;
+  return [st.classes && n(st.classes, 'class', 'classes'), st.school && n(st.school, 'school day', 'school days'),
+    st.shifts && n(st.shifts, 'work shift', 'work shifts') + ' · <b>' + hrs(st.shiftMin) + '</b> of work',
+    st.study >= 60 && n(Math.round(st.study / 60), 'hour', 'hours') + ' of study time on your plan', st.walks && n(st.walks, 'walk', 'walks') + ' and fresh air',
+    st.plans && n(st.plans, 'plan, outing or appointment', 'plans, outings and appointments'), st.chores && n(st.chores, 'chore', 'chores') + ' checked off',
+    st.deadlines && n(st.deadlines, 'deadline', 'deadlines') + ' kept track of', st.notes && n(st.notes, 'day', 'days') + ' you wrote notes'].filter(Boolean);
+}
+function openBirthday(){
+  const k = todayKey(), st = yearStats(k), n = S.settings.name.trim(), items = yearHighlights(st);
+  $('bdTitle').textContent = 'Happy birthday' + (n ? ', ' + n : '') + '!';
+  $('bdIntro').textContent = !items.length ? 'Today is all about you. Enjoy every minute.' : st.days >= 330 ? 'Look at everything you did this year:' : `In the ${st.days} day${st.days === 1 ? '' : 's'} you've planned with Schedule Compass, look at everything you did:`;
+  $('bdList').innerHTML = items.map(i => `<li>${i}</li>`).join(''); $('bdList').hidden = !items.length;
+  $('bdClose').textContent = items.length ? BDAY_LINES[(S.settings.affSeed + fromKey(k).getFullYear()) % BDAY_LINES.length] : 'Here’s to a wonderful year ahead.';
+  $('bdayView').hidden = false; $('bdDone').focus();
+}
+$('bdDone').onclick = ()=>{ $('bdayView').hidden = true; };
+$('bdayView').addEventListener('keydown', e=>{ if(e.key === 'Escape') $('bdayView').hidden = true; });
+$('coming').addEventListener('click', e=>{ if(e.target.closest('[data-bday]')) openBirthday(); });
+$('bdShare').onclick = async ()=>{
+  const text = [$('bdTitle').textContent, $('bdIntro').textContent, ...[...$('bdList').children].map(li => '• ' + li.textContent), $('bdClose').textContent].join('\n');
+  const Sh = IS_NATIVE && window.Capacitor.Plugins && window.Capacitor.Plugins.Share;
+  try{ if(Sh) await Sh.share({title:'My year', text}); else if(navigator.share) await navigator.share({title:'My year', text}); else { await navigator.clipboard.writeText(text); $('bdShare').textContent = 'Copied!'; } }catch(e){}
+};
+// In the app: a notification on the morning of your birthday (asks permission only when you add or change your birthday).
+async function scheduleBday(ask){
+  const LN = IS_NATIVE && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications; if(!LN) return;
+  try{
+    await LN.cancel({notifications:[{id:1001}]}).catch(()=>{});
+    const md = S.settings.bday; if(!fullBday(md)) return;
+    let perm = (await LN.checkPermissions()).display;
+    if(perm !== 'granted' && ask && perm !== 'denied') perm = (await LN.requestPermissions()).display;
+    if(perm !== 'granted') return;
+    const [m, d] = md.split('-').map(Number), now = new Date();
+    const on = y => (m === 2 && d === 29 && !isLeap(y)) ? new Date(y, 1, 28, 8, 30) : new Date(y, m - 1, d, 8, 30);
+    let at = on(now.getFullYear()); if(at <= now) at = on(now.getFullYear() + 1);
+    const n = S.settings.name.trim();
+    await LN.schedule({notifications:[{id:1001, title:'Happy birthday' + (n ? ', ' + n : '') + '! 🎂', body:'Open Schedule Compass for a look back at everything you did this year.', schedule:{at}}]});
+  }catch(e){}
+}
 
 /* ---------- handwriting pad ---------- */
 const NP = {key:null, color:'#2A2A2A', pen:'#2A2A2A', size:3, erase:false, drawing:false, undo:[], inked:false, last:null};
@@ -1751,7 +2284,8 @@ $('npDelete').onclick = ()=>{ delete S.notes[NP.key]; save(); renderWeek(); clos
 $('npCancel').onclick = $('npClose').onclick = closeNote;
 $('notepad').addEventListener('keydown', e=>{ if(e.key === 'Escape') closeNote(); });
 $('addPaste').onclick = ()=>{
-  const {added, skipped} = parseLines($('paste').value, $('pasteType').value); save(); renderWeek(); renderEvents();
+  const pw = $('pasteWhoL').hidden ? 'me' : $('pasteWho').value, who = pw === 'all' ? ['me', ...namedPeople().map(p => p.id)] : [pw];
+  const {added, skipped} = parseLines($('paste').value, $('pasteType').value, who); save(); renderWeek(); renderEvents();
   let m = added.length ? `Added ${added.length} ${added.length===1?'thing':'things'}.` : 'Nothing new to add.';
   if(skipped.length) m += ` Couldn't read: “${skipped.slice(0,3).join('”, “')}”${skipped.length>3?'…':''} (lines need a day and a time).`;
   $('pasteMsg').textContent = m; if(added.length) $('paste').value = '';
@@ -1759,9 +2293,11 @@ $('addPaste').onclick = ()=>{
 $('addOne').onclick = ()=>{
   const date = $('fDate').value, s = $('fStart').value, e = $('fEnd').value, type = $('fType').value;
   if(!date || !s || !e){ $('oneMsg').textContent = 'Pick a date, a start time and an end time.'; return; }
-  S.events.push({id:uid(), date, start:s, end:e, type, label:$('fLabel').value.trim() || TYPE_LABEL[type], where:$('fWhere').value.trim(), drive:driveVal($('fDrive').value)});
+  const ev = {id:uid(), date, start:s, end:e, type, label:$('fLabel').value.trim() || TYPE_LABEL[type], where:$('fWhere').value.trim(), drive:driveVal($('fDrive').value)};
+  const who = $('fWhoRow').hidden ? [] : checkedIn('fWho'); if(who.length && !(who.length === 1 && who[0] === 'me')) ev.who = who;
+  S.events.push(ev);
   save(); weekStart = mondayOf(fromKey(date)); renderWeek(); renderEvents();
-  $('oneMsg').textContent = 'Added to '+DAYS[fromKey(date).getDay()]+', '+niceDate(date)+'.'; $('fLabel').value = ''; $('fWhere').value = ''; $('fDrive').value = '';
+  $('oneMsg').textContent = 'Added to '+DAYS[fromKey(date).getDay()]+', '+niceDate(date)+(ev.who ? ' for '+whoText(ev) : '')+'.'; $('fLabel').value = ''; $('fWhere').value = ''; $('fDrive').value = '';
 };
 $('evList').addEventListener('click', ev=>{ const id = ev.target.closest('[data-del]')?.dataset.del; if(!id) return;
   S.events = S.events.filter(e=>e.id!==id); save(); renderWeek(); renderEvents(); });
@@ -1770,6 +2306,35 @@ const SET_MAP = {sName:['name','s'], sWake:['wake','s'], sBed:['bedtime','s'], s
 Object.entries(SET_MAP).forEach(([id,[k,t]])=>$(id).addEventListener('change',()=>{
   const v = $(id).value; if(t==='n'){ const n = parseFloat(v); if(isNaN(n)) return; S.settings[k] = n; } else if(v!=='' || k==='name') S.settings[k] = v.trim();
   save(); renderAll(); }));
+$('sRoles').addEventListener('change', ()=>{ S.settings.roles = checkedIn('sRoles'); save(); renderAll(); });
+$('sExtras').addEventListener('change', e=>{ const v = e.target.value; S.settings[v] = e.target.checked;
+  if(v === 'family' && e.target.checked && !S.people.length) S.people.push(newPerson());
+  if(v === 'chores' && e.target.checked && !S.chores.length) S.chores.push(newChore());
+  save(); renderAll(); });
+['sBdayM','sBdayD'].forEach(id => $(id).addEventListener('change', ()=>{ S.settings.bday = bdayFrom('sBdayM', 'sBdayD'); save(); renderAll(); scheduleBday(fullBday(S.settings.bday)); }));
+$('sAff').onchange = ()=>{ S.settings.affStyle = $('sAff').value; save(); renderAll(); };
+$('sSchool').addEventListener('change', ev=>{ if(schoolEdit(ev)) renderWeek(); });
+$('addPerson').onclick = ()=>{ S.people.push(newPerson()); save(); renderFamily(); const ins = $('peopleList').querySelectorAll('[data-pk=name]'); if(ins.length) ins[ins.length-1].focus(); };
+$('peopleList').addEventListener('change', e=>{ const row = e.target.closest('[data-pid]'); if(!row) return; const p = S.people.find(x=>x.id===row.dataset.pid); if(!p) return; const k = e.target.dataset.pk;
+  if(k === 'name') p.name = e.target.value.trim(); else if(k === 'color') p.color = e.target.value;
+  else if(k === 'bm' || k === 'bd'){ p.bday = bdayOf(row.querySelector('[data-pk=bm]').value, row.querySelector('[data-pk=bd]').value); }
+  save(); renderFamily(); renderWhoPickers(); renderWeek(); renderEvents(); });
+$('peopleList').addEventListener('click', e=>{ const id = e.target.closest('[data-delperson]')?.dataset.delperson; if(!id) return;
+  S.people = S.people.filter(p => p.id !== id);
+  // plans that were only for this person go too; shared ones just drop them
+  S.events = S.events.filter(ev => { if(!Array.isArray(ev.who) || !ev.who.includes(id)) return true; ev.who = ev.who.filter(x => x !== id); return ev.who.length > 0; });
+  save(); renderAll(); });
+$('addChore').onclick = ()=>{ S.chores.push(newChore()); save(); renderFamily(); const ins = $('choreList').querySelectorAll('[data-ck=name]'); if(ins.length) ins[ins.length-1].focus(); };
+$('choreList').addEventListener('change', e=>{ const row = e.target.closest('[data-chid]'); if(!row) return; const c = S.chores.find(x=>x.id===row.dataset.chid); if(!c) return;
+  if(e.target.dataset.cday !== undefined){ const d = +e.target.dataset.cday; c.days = e.target.checked ? [...new Set([...(c.days||[]), d])] : (c.days||[]).filter(x=>x!==d); }
+  else if(e.target.dataset.ck) c[e.target.dataset.ck] = e.target.value.trim();
+  save(); renderWeek(); });
+$('choreList').addEventListener('click', e=>{ const id = e.target.closest('[data-delchore]')?.dataset.delchore; if(!id) return;
+  S.chores = S.chores.filter(c => c.id !== id); save(); renderFamily(); renderWeek(); });
+// Checking off a chore, on the week or in Today view
+document.addEventListener('change', e=>{ const key = e.target.dataset && e.target.dataset.chore; if(!key) return;
+  if(e.target.checked) S.choreDone[key] = 1; else delete S.choreDone[key];
+  save(); document.querySelectorAll(`[data-chore="${key}"]`).forEach(x => { x.checked = e.target.checked; }); });
 $('sLooks').addEventListener('change', e=>{ S.settings.look = e.target.value; S.settings.color = LOOKS[e.target.value].defaultColor; save(); renderAll(); });
 $('sSwatches').addEventListener('change', e=>{ S.settings.color = e.target.value; save(); renderAll(); });
 function classEdit(ev, rerender){
@@ -1796,9 +2361,15 @@ let armed = false;
 $('clearEv').onclick = ()=>{ if(!armed){ armed = true; $('clearEv').textContent = 'Tap again to clear everything'; setTimeout(()=>{ armed = false; $('clearEv').textContent = 'Clear all shifts & plans'; }, 4000); return; }
   S.events = []; save(); renderAll(); armed = false; $('clearEv').textContent = 'Clear all shifts & plans'; $('safeMsg').textContent = 'All shifts and plans cleared.'; };
 
-load(); $('fDate').value = weekStart; $('dDate').value = todayKey(); renderAll();
+load(); ensureMeta(); $('fDate').value = weekStart; $('dDate').value = todayKey(); renderAll();
 if(!S.settings.onboarded) openWelcome();
-else { const t = document.getElementById('d-'+todayKey()); if(t && window.innerWidth < 720) t.scrollIntoView({block:'start'}); }
+else {
+  const t = document.getElementById('d-'+todayKey()); if(t && window.innerWidth < 720) t.scrollIntoView({block:'start'});
+  if(S.settings.startToday) openToday(todayKey());
+  const yr = String(new Date().getFullYear());
+  if(birthdaysOn(todayKey()).some(b => b.me) && S.settings.bdaySeen !== yr){ S.settings.bdaySeen = yr; save(); openBirthday(); }
+  scheduleBday(false);
+}
 
 if(IS_NATIVE) document.querySelectorAll('.web-only').forEach(e => e.remove());
 if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(()=>{});
