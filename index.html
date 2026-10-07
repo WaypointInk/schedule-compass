@@ -288,6 +288,14 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 .bdbox li{background:var(--soft);border-radius:12px;padding:10px 12px;font-size:15px;color:var(--ink)}
 .bdbox li b{color:var(--accent-deep)}
 .hero .bdbtn{margin-top:10px}
+/* shift rotations */
+.rot{border:1.5px solid var(--line);border-radius:var(--radius);padding:12px;margin-bottom:12px;display:flex;flex-direction:column;gap:8px;background:var(--work-bg);color:var(--work-fg)}
+.rot .rh{display:flex;gap:10px;align-items:flex-start}.rot .rh b{flex:1;font-size:15px}
+.rot .rs{font-size:13px;line-height:1.4}
+.rot .skips{display:flex;flex-wrap:wrap;gap:6px}
+.rot .skips span{display:inline-flex;align-items:center;gap:4px;background:var(--card);border-radius:var(--pill);padding:2px 4px 2px 10px;font-size:12.5px}
+.rot .skips .x{width:28px;height:28px;font-size:15px}
+.rot .row{margin:0}
 .print-only{display:none}
 @media print{
   @page{size:letter landscape;margin:0.35in}
@@ -524,9 +532,33 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       <button class="icon-btn" id="next2" aria-label="Next week"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
     </div>
     <div class="cards">
+      <div class="card" id="rotCard">
+        <h2 class="display">Shift rotation</h2>
+        <p class="hint">Police, fire, EMS, nursing and other rotating schedules. Pick your pattern and a start date, and every shift fills in for you, week after week. Trade a shift or take a day off any time.</p>
+        <div id="rotList"></div>
+        <label class="f">My schedule<select id="rPat"></select></label>
+        <p class="hint" id="rPatHint" style="margin:6px 0 10px"></p>
+        <label class="f" id="rCustomL" hidden style="margin-bottom:10px">My pattern<input type="text" id="rCustom" placeholder="DDDD----" autocapitalize="characters"><small style="font-weight:400">One letter per day: D = day shift, N = night shift, - = off. It repeats from the start date.</small></label>
+        <div class="row">
+          <label class="f" id="rPlatoonL" hidden>My shift<select id="rPlatoon"><option value="0">A shift</option><option value="1">B shift</option><option value="2">C shift</option></select></label>
+          <label class="f"><span id="rAnchorLbl">Start date (first day of a work block)</span><input type="date" id="rAnchor"></label>
+        </div>
+        <div class="row">
+          <label class="f">Shift starts<input type="time" id="rStart" value="07:00"></label>
+          <label class="f">Hours per shift<input type="number" id="rHours" value="12" min="4" max="24" step="0.5"></label>
+          <label class="f" id="rNightL" hidden>Night shift starts<input type="time" id="rNight" value="19:00"></label>
+        </div>
+        <div class="row">
+          <label class="f">Name (optional)<input type="text" id="rLabel" placeholder="e.g. Patrol, Station 4"></label>
+          <label class="f">Where (optional)<input type="text" id="rWhere" placeholder="e.g. Fire Station 4"></label>
+          <label class="f">Drive time (min)<input type="number" id="rDrive" min="0" max="240" step="5" placeholder="none"></label>
+        </div>
+        <button class="btn primary" id="rAdd">Fill in my shifts</button>
+        <div class="msg" id="rMsg" role="status"></div>
+      </div>
       <div class="card">
         <h2 class="display">Type in your week</h2>
-        <p class="hint">One per line: a day and a time. Day names mean the week shown above, or use a date like 10/14. Anything else on the line becomes its name. You can paste straight from a work scheduling app.<br><em>e.g.</em> Wed 7am-12pm · Thu 1:00-6:30 PM · Fri 10/16 game night 7-10pm</p>
+        <p class="hint">One per line: a day and a time. Day names mean the week shown above, or use a date like 10/14. Anything else on the line becomes its name. You can paste straight from a work scheduling app.<br><em>e.g.</em> Wed 7am-12pm · Thu 1:00-6:30 PM · Fri 10/16 game night 7-10pm<br>On a shift rotation? Time off works too: <em>Kelly day Oct 14 · PTO 10/20-10/24 · funeral leave Nov 3 · overtime Fri</em></p>
         <label class="f" for="paste">Shifts &amp; plans</label>
         <textarea id="paste" placeholder="Wed 7:00 AM – 12:00 PM&#10;Thu 1:00 – 6:30 PM&#10;Sat 8-2"></textarea>
         <div class="row" style="margin-top:10px">
@@ -1222,7 +1254,7 @@ const DEFAULTS = {
   settings:{name:'', look:'bloom', color:'rose', onboarded:false, wake:'07:00', bedtime:'22:30', sleepHrs:8, readyMins:60, nightMins:30,
             commuteMins:30, walkMins:60, hoursPerCredit:2, maxStudyDay:4, walkDay:'auto',
             roles:['college','work'], family:false, chores:false, startToday:false, bday:'', affStyle:'auto', affSeed:0, bdaySeen:'', since:''},
-  classes:[], events:[], dates:[], notes:{}, people:[], chores:[], choreDone:{},
+  classes:[], events:[], dates:[], notes:{}, people:[], chores:[], choreDone:{}, rotations:[],
   school:{days:[1,2,3,4,5], start:'07:45', end:'14:50', where:'', drive:null, homework:60, from:'', until:''},
   printOpts:{orient:'landscape', lines:true, page:false, ink:true, compact:true}
 };
@@ -1231,6 +1263,7 @@ const clone = o => JSON.parse(JSON.stringify(o));
 function normalize(d){ const b = clone(DEFAULTS);
   return {settings:Object.assign(b.settings, d.settings||{}), classes:Array.isArray(d.classes)?d.classes:[], events:Array.isArray(d.events)?d.events:[], dates:Array.isArray(d.dates)?d.dates:[],
     notes:(d.notes && typeof d.notes === 'object') ? d.notes : {}, printOpts:Object.assign(b.printOpts, d.printOpts||{}),
+    rotations:Array.isArray(d.rotations)?d.rotations:[],
     people:Array.isArray(d.people)?d.people:[], chores:Array.isArray(d.chores)?d.chores:[], choreDone:(d.choreDone && typeof d.choreDone === 'object') ? d.choreDone : {},
     school:Object.assign(b.school, d.school||{})}; }
 function load(){ try{ const r = localStorage.getItem(KEY); if(r){ S = normalize(JSON.parse(r)); return; } }catch(e){} S = clone(DEFAULTS); }
@@ -1262,6 +1295,48 @@ const dayOpts = md => '<option value="">—</option>' + Array.from({length:31}, 
 const bdayOf = (m, d) => m || d ? (m || '00') + '-' + (d || '00') : '';
 const bdayFrom = (mId, dId) => bdayOf($(mId).value, $(dId).value);
 const fullBday = md => /^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(md || '');
+
+/* ---------- shift rotations (police, fire, EMS, nursing…) ---------- */
+// pat: one letter per day, repeating from the start date. D = day shift, N = night shift, - = off.
+// platoons: A/B/C fire shifts, where B starts a third of the way through the cycle and C two thirds.
+const ROT_PRESETS = [
+  ['4on4off', '4 on, 4 off', 'DDDD----', 12, 'Four 12-hour shifts, then four days off.'],
+  ['7on7off', '7 on, 7 off', 'DDDDDDD-------', 12, 'Seven 12-hour shifts, then seven days off.'],
+  ['pitman', '2-2-3 (Pitman)', 'DD--DDD--DD---', 12, '2 on, 2 off, 3 on, 2 off, 2 on, 3 off: every other weekend off.'],
+  ['abc2448', 'A/B/C fire shifts · 24 on, 48 off', 'D--', 24, 'A, B and C shifts take turns: one 24-hour shift, then two days off.', true],
+  ['abckelly', 'A/B/C fire shifts · Kelly schedule', 'D-D-D----', 24, '24 on, 24 off, 24 on, 24 off, 24 on, then four days off.', true],
+  ['abc4896', 'A/B/C fire shifts · 48 on, 96 off', 'DD----', 24, 'Two 24-hour shifts in a row, then four days off.', true],
+  ['2472', '24 on, 72 off', 'D---', 24, 'One 24-hour shift, then three days off.'],
+  ['4on4offDN', '4 on, 4 off · days, then nights', 'DDDD----NNNN----', 12, 'Four day shifts, four off, four night shifts, four off.'],
+  ['dupont', 'DuPont (12-hour, 4 weeks)', 'NNNN---DDD-NNN---DDDD-------', 12, '4 nights, 3 off, 3 days, 1 off, 3 nights, 3 off, 4 days, 7 off.'],
+  ['3on3off', '3 on, 3 off', 'DDD---', 12, 'Three 12-hour shifts, then three days off.'],
+  ['4x10', 'Four 10s', 'DDDD---', 10, 'Four 10-hour shifts, then three days off.'],
+  ['5on2off', '5 on, 2 off', 'DDDDD--', 8, 'Five 8-hour shifts, then two days off.'],
+  ['custom', 'Something else (type my own)', '', 12, '']
+];
+const rotPreset = key => ROT_PRESETS.find(p => p[0] === key);
+// 'D' or 'N' when this rotation works on day k, otherwise null
+function rotShiftOn(rot, k){
+  if(!rot.pat || !rot.anchor || k < rot.anchor || (rot.until && k > rot.until) || (rot.skip || []).includes(k)) return null;
+  const n = rot.pat.length, c = rot.pat[(daysBetween(rot.anchor, k) % n + n) % n];
+  return c === 'D' || c === 'N' ? c : null;
+}
+const rotStartMin = (rot, c) => toMin(c === 'N' ? rot.night || '19:00' : rot.start);
+const rotLabel = rot => (rot.label || '').trim() || (rot.platoon != null ? 'ABC'[rot.platoon] + ' shift' : 'Shift');
+// Shift blocks for day k: today's shift, plus the end of a shift that started yesterday and runs past midnight.
+function rotBlocks(k){
+  const out = [];
+  if(!hasRole('work')) return out;
+  for(const rot of S.rotations){
+    const base = {cat:'work', where:(rot.where||'').trim(), drive:rot.drive ?? null, rot:true};
+    const c = rotShiftOn(rot, k);
+    if(c){ const s = rotStartMin(rot, c); out.push({...base, s, e:s + rot.hours * 60, label:rotLabel(rot) + ' · ' + hrs(rot.hours * 60), night:c === 'N' || s >= 15 * 60}); }
+    const pc = rotShiftOn(rot, addDays(k, -1));
+    if(pc){ const s = rotStartMin(rot, pc), e = s + rot.hours * 60 - 1440;
+      if(e > 0) out.push({...base, s:0, e, label:rotLabel(rot) + ' (since yesterday)', carry:true, from:s, long:rot.hours >= 16}); }
+  }
+  return out;
+}
 
 /* ---------- family & chores ---------- */
 // Plans with no "who" (or with "me" in it) are yours and get planned around; the rest show on your week as family plans.
@@ -1297,7 +1372,7 @@ const toMin = t => { const [h,m] = String(t||'0:0').split(':').map(Number); retu
 const toHHMM = m => String(Math.floor(m/60)%24).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
 const up15 = m => Math.ceil(m/15)*15, dn15 = m => Math.floor(m/15)*15;
 function fmt(m, ap=true){ m = ((m%1440)+1440)%1440; let h = Math.floor(m/60); const mm = m%60, a = h<12?'am':'pm'; h = h%12||12; return h+':'+String(mm).padStart(2,'0')+(ap?' '+a:''); }
-function fmtRange(s,e){ return Math.floor((s%1440)/720) === Math.floor((e%1440)/720) ? fmt(s,false)+'–'+fmt(e) : fmt(s)+' – '+fmt(e); }
+function fmtRange(s,e){ if(e > 1440 + 60) return fmt(s) + ' – ' + fmt(e) + ' (next day)'; return Math.floor((s%1440)/720) === Math.floor((e%1440)/720) ? fmt(s,false)+'–'+fmt(e) : fmt(s)+' – '+fmt(e); }
 const hrs = m => { m = Math.round(m); if(m < 60) return m+' min'; const h = Math.floor(m/60), r = m%60;
   if(!r) return h+(h===1?' hr':' hrs'); if(r===30) return h+'.5 hrs'; return h+(h===1?' hr ':' hrs ')+r+' min'; };
 const MONTHS = ['Jan','Feb','Mar','Apr','May','June','July','Aug','Sept','Oct','Nov','Dec'];
@@ -1344,6 +1419,13 @@ function fixedFor(k){
   if(!off && hasRole('hs')){ const sc = S.school;
     if(sc.days.includes(dow) && !(sc.from && k < sc.from) && !(sc.until && k > sc.until))
       out.push({s:toMin(sc.start), e:toMin(sc.end), cat:'class', label:'School', where:(sc.where||'').trim(), drive:sc.drive ?? null}); }
+  out.push(...rotBlocks(k));
+  // the morning end of any plan from yesterday that ran past midnight (an overtime 24, a night shift you typed in)
+  for(const ev of S.events){
+    if(ev.date !== addDays(k, -1) || !forMe(ev)) continue;
+    const s = toMin(ev.start), e = toMin(ev.end); if(e > s || e < 120) continue;
+    out.push({s:0, e, cat:TYPE_CAT[ev.type]||'fun', label:(ev.label||TYPE_LABEL[ev.type]||'Plans') + ' (since yesterday)', where:(ev.where||'').trim(), drive:ev.drive ?? null, carry:true, long:(e + 1440 - s) >= 16 * 60});
+  }
   for(const ev of S.events){
     if(ev.date !== k || !forMe(ev)) continue;
     let s = toMin(ev.start), e = toMin(ev.end); if(e <= s) e += 1440;
@@ -1364,12 +1446,15 @@ function travelBlocks(fixed){
   const out = [];
   fixed.forEach((b, i) => {
     if(!(b.drive > 0)) return;
+    if(b.carry){ const next = fixed.slice(i + 1).find(x => x.s >= b.e);
+      if(!(next && next.s - b.e < 180)) out.push({s:b.e, e:b.e + b.drive, cat:'drive', label:'Drive home · '+hrs(b.drive)}); return; }
     const prev = fixed.slice(0, i).reverse().find(x => x.e <= b.s);
     const near = prev && b.s - prev.e < (prev.drive || 0) + b.drive + 60;
     if(!(near && samePlace(prev, b))){
       const s = near ? Math.max(b.s - b.drive, prev.e) : b.s - b.drive;
       if(b.s - s >= 5) out.push({s, e:b.s, cat:'drive', label:'Drive to '+(b.where || b.label)+' · '+hrs(b.s - s), where:b.where, dir:true});
     }
+    if(b.e > 1440) return; // overnight: the drive home is on tomorrow's plan
     const next = fixed.slice(i + 1).find(x => x.s >= b.e);
     const goingOn = next && next.s - b.e < b.drive + (next.drive || 0) + 60 && (next.drive > 0 || samePlace(b, next));
     if(!goingOn) out.push({s:b.e, e:b.e + b.drive, cat:'drive', label:'Drive home · '+hrs(b.drive)});
@@ -1418,10 +1503,22 @@ function pickCourse(q, avoid){
 /* Build one day. target = study minutes wanted today; q = shared course queue (mutated). */
 function planDay(k, isWalkDay, target, q){
   const st = S.settings, L = look(), blocks = [];
-  const wake = wakeFor(k), readyEnd = wake + st.readyMins, bed = bedFor(k), nightStart = bed - st.nightMins;
+  const bed = bedFor(k), nightStart = bed - st.nightMins;
   const fixed = fixedFor(k).map(b=>({...b}));
   for(let i=0;i<fixed.length;i++) for(let j=i+1;j<fixed.length;j++) if(fixed[i].e > fixed[j].s) fixed[i].conflict = fixed[j].conflict = true;
-  blocks.push({s:wake, e:readyEnd, cat:'routine', label:L.ready});
+  // Coming off an overnight or 24-hour shift: no morning routine. Get home, then sleep (after nights) or rest (after a 24).
+  // If the next shift starts right away (48s), there's nothing to plan in between.
+  const carry = fixed.find(b => b.carry);
+  let wake = wakeFor(k), readyEnd = wake + st.readyMins;
+  if(carry){
+    const home = carry.e + (carry.drive != null ? carry.drive : st.commuteMins), next = fixed.find(b => !b.carry && b.s >= carry.e);
+    if(next && next.s - carry.e < 180){ wake = readyEnd = carry.e; }
+    else { const rest = carry.long ? 180 : Math.min(st.sleepHrs * 60, 8 * 60);
+      blocks.push({s:home, e:home + rest, cat:'routine', label:(carry.long ? 'Rest & recharge after your shift' : 'Sleep after your shift') + ' · ' + hrs(rest)});
+      wake = readyEnd = home + rest; }
+  } else blocks.push({s:wake, e:readyEnd, cat:'routine', label:L.ready});
+  // A shift that runs into tomorrow morning takes the place of tonight's routine and sleep
+  const overnight = fixed.some(b => !b.carry && b.e >= 1440 + 180);
   fixed.forEach(b=>{ if(b.conflict) b.note = 'Overlaps something. Check!'; blocks.push(b); });
   const travel = travelBlocks(fixed); travel.forEach(t => blocks.push(t));
   // BUF = breathing room between planned items, so one never ends at the minute the next begins
@@ -1431,7 +1528,7 @@ function planDay(k, isWalkDay, target, q){
   for(const t of travel) gaps = subtract(gaps, t.s - BUF, t.e + BUF);
   const place = (s,e,cat,label,note) => { blocks.push({s,e,cat,label,note}); gaps = subtract(gaps, s - BUF, e + BUF); };
   const g0 = gaps.find(g=>g[0]===readyEnd + BUF);
-  if(g0 && g0[1]-g0[0] >= 45) place(readyEnd + BUF, readyEnd + BUF + 30, 'meal', 'Breakfast');
+  if(g0 && g0[1]-g0[0] >= 45 && !carry) place(readyEnd + BUF, readyEnd + BUF + 30, 'meal', 'Breakfast');
   const lunch = fit(gaps, 11*60+30, 14*60+15, 45, 12*60);
   if(lunch!==null) place(lunch, lunch+45, 'meal', 'Lunch'); else packNote(fixed, 11*60+30, 14*60, L.lunch);
   const dinner = fit(gaps, 17*60, 20*60+30, 60, 18*60);
@@ -1459,9 +1556,11 @@ function planDay(k, isWalkDay, target, q){
     if(!done) break;
   }
   for(const [a,b] of gaps){ const s = up15(a), e = dn15(b); if(e-s >= 45) blocks.push({s, e, cat:'meal', label:L.me}); }
-  if(st.nightMins > 0) blocks.push({s:nightStart, e:bed, cat:'routine', label:'Night routine & wind down'});
-  const nw = wakeFor(addDays(k,1));
-  blocks.push({s:bed, e:bed, cat:'routine', label:L.sleep+' · '+hrs(nw+1440-bed), note:'up at '+fmt(nw), sleep:true});
+  if(!overnight){
+    if(st.nightMins > 0) blocks.push({s:nightStart, e:bed, cat:'routine', label:'Night routine & wind down'});
+    const nw = wakeFor(addDays(k,1));
+    blocks.push({s:bed, e:bed, cat:'routine', label:L.sleep+' · '+hrs(nw+1440-bed), note:'up at '+fmt(nw), sleep:true});
+  }
   blocks.sort((a,b)=>a.s-b.s || (a.sleep?1:0)-(b.sleep?1:0));
   return {blocks, studied, capacity};
 }
@@ -1500,6 +1599,7 @@ const weekDays = () => Array.from({length:7},(_,i)=>addDays(weekStart,i));
 const rangeText = () => { const d = weekDays(); return niceDate(d[0])+' – '+niceDate(d[6]); };
 
 const chipHtml = x => `<div class="chip ${x.kind}">${x.kind==='deadline'?FLAG:ICON(12)}<span>${x.kind==='off'?'No classes · ':''}${esc(x.label)}</span></div>`;
+const offHtml = k => offWorkOn(k).map(w => `<div class="chip off">${ICON(12)}<span>${esc(w)} · off work</span></div>`).join('');
 const bdHtml = k => birthdaysOn(k).map(b => `<div class="bdchip">🎂 ${b.me ? 'Happy birthday, ' + esc(b.name) + '!' : esc(b.name) + '’s birthday'}</div>`).join('');
 const famItem = e => `<div class="blk fchip" style="--pc:${whoColor(e)}"><b>${fmtRange(toMin(e.start), toMin(e.end))}</b> ${esc(e.label || TYPE_LABEL[e.type] || 'Plans')}<span class="who">${esc(whoText(e))}${e.where ? ' · ' + esc(e.where) : ''}</span></div>`;
 // My blocks and family plans together, in time order
@@ -1571,6 +1671,34 @@ function renderWhoPickers(){
   if([...$('pasteWho').options].some(o => o.value === pv)) $('pasteWho').value = pv;
 }
 
+function renderRotations(){
+  $('rotCard').hidden = !hasRole('work');
+  if($('rPat').options.length === 0){
+    $('rPat').innerHTML = ROT_PRESETS.map(p => `<option value="${p[0]}">${esc(p[1])}</option>`).join('');
+    $('rAnchor').value = todayKey(); rotFormSync();
+  }
+  const t = todayKey();
+  $('rotList').innerHTML = S.rotations.map(rot => {
+    const next = []; for(let x = t; next.length < 4 && x <= addDays(t, 60); x = addDays(x, 1)){ const c = rotShiftOn(rot, x); if(c) next.push(`${DOW_SHORT[fromKey(x).getDay()]} ${niceDate(x)}${c === 'N' ? ' (night)' : ''}`); }
+    const skips = (rot.skip || []).filter(x => x >= t).sort();
+    return `<div class="rot" data-rot="${rot.id}">
+      <div class="rh"><b>${esc(rotLabel(rot))} · ${esc(rot.name)}</b><button class="x" style="background:var(--card);width:40px;height:40px" data-delrot="${rot.id}" aria-label="Remove this rotation">×</button></div>
+      <div class="rs">${fmt(toMin(rot.start))}${rot.pat.includes('N') ? ' (nights ' + fmt(toMin(rot.night || '19:00')) + ')' : ''} · ${hrs(rot.hours * 60)} shifts · started ${niceDate(rot.anchor)}${rot.where ? ' · ' + esc(rot.where) : ''}${rot.until ? ' · ends ' + niceDate(rot.until) : ''}</div>
+      <div class="rs"><strong>Next shifts:</strong> ${next.length ? esc(next.join(' · ')) : 'none in the next two months'}</div>
+      <label class="f">Time off or extra shifts: just type it<span style="display:flex;gap:8px"><input type="text" data-rotoff="${rot.id}" placeholder="Kelly day Oct 14 · PTO 10/20-10/24 · Overtime Fri"><button class="btn" data-rotoffgo="${rot.id}">Add</button></span></label>
+      ${skips.length ? `<div class="skips">${skips.map(x => `<span>${esc((rot.why || {})[x] || 'Off')} · ${DOW_SHORT[fromKey(x).getDay()]} ${niceDate(x)}<button class="x" data-unskip="${rot.id}|${x}" aria-label="Put the ${niceDate(x)} shift back">×</button></span>`).join('')}</div>` : ''}
+      <label class="f">Last day on this schedule (optional)<input type="date" data-rotuntil="${rot.id}" value="${rot.until || ''}"></label>
+    </div>`; }).join('');
+}
+function rotFormSync(){
+  const p = rotPreset($('rPat').value), custom = p[0] === 'custom', pat = custom ? ($('rCustom').value || '').toUpperCase() : p[2];
+  $('rCustomL').hidden = !custom; $('rPlatoonL').hidden = !p[5];
+  $('rPatHint').textContent = p[4];
+  $('rNightL').hidden = !pat.includes('N');
+  $('rAnchorLbl').textContent = p[5] ? 'A day A shift works' : 'Start date (first day of a work block)';
+  if(!custom) $('rHours').value = p[3];
+}
+
 function renderAll(){
   applyTheme(S.settings.look, S.settings.color);
   const L = look(), n = S.settings.name.trim();
@@ -1585,7 +1713,7 @@ function renderAll(){
   const bday = birthdaysOn(todayKey()).some(b => b.me), aff = bday ? 'Today is all about you.' : affirmationFor(todayKey());
   if(bday) $('greeting').textContent = 'Happy birthday' + (n ? ', ' + n : '') + '! 🎂 · ' + DAYS[now.getDay()] + ', ' + MONTHS[now.getMonth()] + ' ' + now.getDate();
   $('todayAff').textContent = aff; $('todayAff').hidden = !aff;
-  renderRoleUI(); renderSetup(); renderSchool('sSchool'); renderFamily(); renderWhoPickers();
+  renderRoleUI(); renderSetup(); renderSchool('sSchool'); renderFamily(); renderWhoPickers(); renderRotations();
   renderComing(); renderWeek(); renderEvents(); renderSettings(); renderClasses('classList'); renderLookPickers(); renderDates();
 }
 function renderComing(){
@@ -1619,7 +1747,7 @@ function renderWeek(){
     <span class="sub">${wg.credits ? `Goal: ${hrs(goal)} (${wg.credits} credits × ${S.settings.hoursPerCredit} hrs${wg.hw ? ' + ' + hrs(wg.hw) + ' homework' : ''})` : wg.hw ? `Goal: ${hrs(goal)} (${hrs(S.school.homework)} each school day)` : 'Goal: 1 hr a day. Add your courses and credits for a real goal.'}${planned + 45 <= goal ? ` · ${hrs(goal-planned)} short: a busy week, so grab extra time where you can` : ''}</span>`;
   $('grid').innerHTML = days.map((k,i)=>{
     const d = fromKey(k), p = plans[i];
-    const chips = datesOn(k).map(chipHtml).join('');
+    const chips = offHtml(k) + datesOn(k).map(chipHtml).join('');
     const sum = p.studied ? `${ICON(12)} ${hrs(p.studied)} of ${word}` : goal ? `no ${word} today · rest up` : '';
     const note = S.notes[k], aff = affirmationFor(k);
     return `<article class="day${k===today?' today':''}" id="d-${k}">
@@ -1717,6 +1845,79 @@ function finishWelcome(tab){
   save(); $('welcome').hidden = true; showTab(tab); renderAll(); window.scrollTo(0,0);
 }
 $('wGo').onclick = ()=>finishWelcome('week');
+
+$('rPat').onchange = rotFormSync; $('rCustom').oninput = rotFormSync;
+$('rAdd').onclick = ()=>{
+  const p = rotPreset($('rPat').value), custom = p[0] === 'custom';
+  const pat = custom ? ($('rCustom').value || '').toUpperCase().replace(/[^DN]/g, c => c === ' ' ? '' : '-') : p[2];
+  if(!/[DN]/.test(pat) || pat.length < 2){ $('rMsg').textContent = 'Type your pattern with a D for each day shift, N for each night shift and - for each day off (for example DDDD----).'; return; }
+  let anchor = $('rAnchor').value; if(!anchor){ $('rMsg').textContent = 'Pick a start date.'; return; }
+  const hours = Math.max(4, Math.min(24, parseFloat($('rHours').value) || p[3]));
+  const platoon = p[5] ? +$('rPlatoon').value : null;
+  // B shift starts a third of the way into the cycle after A, C two thirds
+  if(platoon) anchor = addDays(anchor, platoon * pat.length / 3);
+  const rot = {id:uid(), key:p[0], name:custom ? 'My rotation (' + pat + ')' : p[1], pat, anchor, start:$('rStart').value || '07:00', night:$('rNight').value || '19:00', hours,
+    label:$('rLabel').value.trim(), where:$('rWhere').value.trim(), drive:driveVal($('rDrive').value), platoon, skip:[], until:''};
+  S.rotations.push(rot); save(); renderAll();
+  let n = 0; for(let x = todayKey(); x <= addDays(todayKey(), 27); x = addDays(x, 1)) if(rotShiftOn(rot, x)) n++;
+  $('rMsg').textContent = `Done! ${n} shift${n === 1 ? '' : 's'} in the next four weeks, and it keeps going.`;
+  $('rLabel').value = ''; $('rWhere').value = ''; $('rDrive').value = '';
+};
+$('rotList').addEventListener('click', e=>{
+  const del = e.target.closest('[data-delrot]')?.dataset.delrot;
+  if(del){ S.rotations = S.rotations.filter(r => r.id !== del); save(); renderAll(); return; }
+  const un = e.target.closest('[data-unskip]')?.dataset.unskip;
+  if(un){ const [id, k] = un.split('|'), rot = S.rotations.find(r => r.id === id); if(rot){ rot.skip = (rot.skip || []).filter(x => x !== k); if(rot.why) delete rot.why[k]; save(); renderAll(); } }
+});
+$('rotList').addEventListener('change', e=>{
+  const un = e.target.dataset.rotuntil, rot = S.rotations.find(r => r.id === un); if(!rot) return;
+  rot.until = e.target.value; save(); renderAll();
+});
+// "Kelly day Oct 14", "PTO 10/20-10/24", "funeral leave Nov 3", "overtime Friday", "picked up a shift 10/18"
+const OFF_WORDS = [[/kelly/i, 'Kelly day'], [/\bpto\b|vacation|annual leave|personal day|holiday/i, 'PTO'], [/funeral|bereave/i, 'Funeral leave'],
+  [/\bsick\b|\bill\b|doctor/i, 'Sick day'], [/trade|traded|swap|swapped|\bcover(ed)?\b/i, 'Traded shift'], [/comp\b|comp time/i, 'Comp time'],
+  [/jury/i, 'Jury duty'], [/military|guard drill|reserve/i, 'Military leave'], [/fmla|maternity|paternity|parental|leave\b/i, 'Leave'],
+  [/injur|light duty|workers.? comp/i, 'Injury leave'], [/training|academy|conference/i, 'Training'], [/\boff\b|day off/i, 'Day off']];
+const EXTRA_RE = /over ?time|\bo\.?t\.?\b|pick(ed)? ?up|extra shift|hold ?over|mandator|forced|called in|recall|working for/i;
+function parseTimeOff(text){
+  const out = [], bad = [];
+  for(const raw of String(text).split(/\n|;/)){
+    const line = raw.trim(); if(!line) continue;
+    let d = findDate(line), start = d && d.start, end = d && d.end;
+    if(!start){ const t = todayKey(), wm = line.match(DOW_RE);
+      if(/\btoday\b/i.test(line)) start = t; else if(/\btomorrow\b/i.test(line)) start = addDays(t, 1);
+      else if(wm){ const w = DOW_MAP[wm[1].toLowerCase()]; for(let i = 0; i < 7; i++) if(fromKey(addDays(t, i)).getDay() === w){ start = addDays(t, i); break; } } }
+    if(!start){ bad.push(line); continue; }
+    const extra = EXTRA_RE.test(line), why = extra ? 'Extra shift' : (OFF_WORDS.find(([re]) => re.test(line)) || [null, 'Day off'])[1];
+    out.push({start, end: end && end > start ? end : start, why, extra, text:line});
+  }
+  return {items:out, bad};
+}
+// Applies typed time off / extra shifts to a rotation. Returns a short summary.
+function applyTimeOff(rot, text){
+  const {items, bad} = parseTimeOff(text); let off = 0, extra = 0;
+  rot.why = rot.why || {}; rot.skip = rot.skip || [];
+  for(const it of items){
+    for(let x = it.start; x <= it.end && x <= addDays(it.start, 60); x = addDays(x, 1)){
+      if(it.extra){ if(rotShiftOn(rot, x)) continue; const s = toMin(rot.start), e = s + rot.hours * 60;
+        S.events.push({id:uid(), date:x, start:rot.start, end:toHHMM(e % 1440), type:'work', label:rotLabel(rot) + ' · extra shift', where:rot.where || '', drive:rot.drive ?? null}); extra++; }
+      else if(rotShiftOn(rot, x)){ rot.skip.push(x); rot.why[x] = it.why; off++; }
+      else if(!rot.skip.includes(x)){ rot.why[x] = it.why; rot.skip.push(x); }
+    }
+  }
+  rot.skip = [...new Set(rot.skip)];
+  const parts = [off && `${off} shift${off === 1 ? '' : 's'} off`, extra && `${extra} extra shift${extra === 1 ? '' : 's'} added`].filter(Boolean);
+  return (parts.length ? 'Got it: ' + parts.join(', ') + '.' : items.length ? 'Noted. You were already off those days.' : '') +
+    (bad.length ? ` Couldn't find a date in “${bad.slice(0, 2).join('”, “')}”. Try something like “PTO Oct 20-24”.` : '');
+}
+// Why you're off work on day k (Kelly day, PTO, funeral leave…), for the week and Today view
+const offWorkOn = k => hasRole('work') ? S.rotations.map(r => (r.skip || []).includes(k) ? (r.why || {})[k] || 'Day off' : null).filter(Boolean) : [];
+$('rotList').addEventListener('click', e=>{
+  const id = e.target.closest('[data-rotoffgo]')?.dataset.rotoffgo; if(!id) return;
+  const rot = S.rotations.find(r => r.id === id), inp = document.querySelector(`[data-rotoff="${id}"]`); if(!rot || !inp.value.trim()) return;
+  const msg = applyTimeOff(rot, inp.value); save(); renderAll(); $('rMsg').textContent = msg;
+});
+$('rotList').addEventListener('keydown', e=>{ if(e.key === 'Enter' && e.target.dataset.rotoff){ e.preventDefault(); document.querySelector(`[data-rotoffgo="${e.target.dataset.rotoff}"]`).click(); } });
 
 /* ---------- smart paste (shifts) ---------- */
 const DOW_RE = /\b(sun|mon|tue|tues|wed|thu|thur|thurs|fri|sat)(day|nesday|rsday|sday|urday)?\b\.?/i;
@@ -1991,8 +2192,9 @@ function shareItems(k, plan, all, who){
   const out = [], keep = b => all || (!b.sleep && b.cat !== 'routine' && b.cat !== 'meal');
   birthdaysOn(k).forEach(b => out.push({s:-1, text:'🎂 ' + b.name + '’s birthday'}));
   if(showsMine(who)){
+    offWorkOn(k).forEach(w => out.push({s:-1, text:w + ' (off work)'}));
     datesOn(k).forEach(d => out.push({s:-1, text:(d.kind === 'off' ? 'No classes: ' : '') + d.label}));
-    plan.blocks.filter(keep).forEach(b => out.push({s:b.s, e:b.e, sleep:b.sleep, cat:b.cat, text:b.label, where:b.cat !== 'drive' ? b.where : ''}));
+    plan.blocks.filter(keep).forEach(b => out.push({s:b.s, e:b.e, sleep:b.sleep, carry:b.carry, cat:b.cat, text:b.label, where:b.cat !== 'drive' ? b.where : ''}));
   }
   S.events.filter(e => e.date === k && (who === 'me' ? false : showsMine(who) ? !forMe(e) : eventFor(e, who))).forEach(e => {
     let s = toMin(e.start), en = toMin(e.end); if(en <= s) en += 1440;
@@ -2023,7 +2225,7 @@ function icsFor(days, who){
   const allDay = (id, k, end, text) => lines.push('BEGIN:VEVENT','UID:sc-'+id+'@schedulecompass','DTSTAMP:'+stamp,'DTSTART;VALUE=DATE:'+k.replace(/-/g,''),'DTEND;VALUE=DATE:'+addDays(end || k, 1).replace(/-/g,''),'SUMMARY:'+icsEsc(text),'END:VEVENT');
   days.forEach(k => {
     shareItems(k, P[k], false, who).forEach((x, j) => {
-      if(x.chore || x.s < 0 || x.sleep || !['class','work','study','fun','appt'].includes(x.cat)) return;
+      if(x.chore || x.s < 0 || x.sleep || x.carry || !['class','work','study','fun','appt'].includes(x.cat)) return;
       const endK = x.e > 1440 ? addDays(k, 1) : k, endM = x.e > 1440 ? x.e - 1440 : Math.min(x.e, 1439);
       lines.push('BEGIN:VEVENT','UID:sc-'+k+'-'+x.s+'-'+j+'@schedulecompass','DTSTAMP:'+stamp,'DTSTART:'+icsLocal(k,x.s),'DTEND:'+icsLocal(endK,endM),'SUMMARY:'+icsEsc(x.text),...(x.where?['LOCATION:'+icsEsc(x.where)]:[]),'END:VEVENT');
     });
@@ -2101,7 +2303,7 @@ function renderToday(){
   $('tvKick').textContent = k === t ? 'Today' : k === addDays(t, 1) ? 'Tomorrow' : k === addDays(t, -1) ? 'Yesterday' : DAYS[d.getDay()];
   $('tvDate').textContent = DAYS[d.getDay()] + ', ' + niceDate(k);
   $('tvAff').textContent = aff; $('tvAff').hidden = !aff;
-  $('tvBody').innerHTML = `<div class="tvlist">${bdHtml(k)}${datesOn(k).map(chipHtml).join('')}${dayBlocksHtml(k, dayItems(k, plan))}${choresHtml(k)}</div>`;
+  $('tvBody').innerHTML = `<div class="tvlist">${bdHtml(k)}${offHtml(k)}${datesOn(k).map(chipHtml).join('')}${dayBlocksHtml(k, dayItems(k, plan))}${choresHtml(k)}</div>`;
   $('tvMsg').textContent = '';
 }
 function openToday(k){ tvDay = k || todayKey(); renderToday(); $('todayView').hidden = false; document.body.style.overflow = 'hidden'; $('tvClose').focus(); }
@@ -2175,12 +2377,12 @@ function yearStats(k){
   const d = fromKey(k), yearAgo = keyOf(new Date(d.getFullYear() - 1, d.getMonth(), d.getDate(), 12)), since = S.settings.since || yearAgo;
   const from = since > yearAgo ? since : yearAgo, to = addDays(k, -1), keys = [], L = look(), inR = x => x >= from && x <= to;
   for(let x = from; x <= to && keys.length < 400; x = addDays(x, 1)) keys.push(x);
-  let classes = 0, school = 0, study = 0, walks = 0;
+  let classes = 0, school = 0, study = 0, walks = 0, rotShifts = 0, rotMin = 0;
   if(keys.length){ const P = plansByDay(keys);
-    keys.forEach(x => P[x].blocks.forEach(b => { if(b.cat === 'class'){ if(b.label === 'School') school++; else classes++; } else if(b.cat === 'study') study += b.e - b.s; else if(b.cat === 'fun' && b.label === L.walk) walks++; })); }
+    keys.forEach(x => P[x].blocks.forEach(b => { if(b.rot){ if(!b.carry){ rotShifts++; rotMin += b.e - b.s; } } else if(b.cat === 'class'){ if(b.label === 'School') school++; else classes++; } else if(b.cat === 'study') study += b.e - b.s; else if(b.cat === 'fun' && b.label === L.walk) walks++; })); }
   const shifts = S.events.filter(e => e.type === 'work' && forMe(e) && inR(e.date));
   const shiftMin = shifts.reduce((t, e) => { const a = toMin(e.start); let b = toMin(e.end); if(b <= a) b += 1440; return t + b - a; }, 0);
-  return {days:keys.length, classes, school, study, walks, shifts:shifts.length, shiftMin,
+  return {days:keys.length, classes, school, study, walks, shifts:shifts.length + rotShifts, shiftMin:shiftMin + rotMin,
     plans:S.events.filter(e => ['event','appt','cal'].includes(e.type) && inR(e.date)).length,
     chores:Object.keys(S.choreDone).filter(x => inR(x.slice(0, 10))).length,
     notes:Object.keys(S.notes).filter(inR).length,
@@ -2284,10 +2486,14 @@ $('npDelete').onclick = ()=>{ delete S.notes[NP.key]; save(); renderWeek(); clos
 $('npCancel').onclick = $('npClose').onclick = closeNote;
 $('notepad').addEventListener('keydown', e=>{ if(e.key === 'Escape') closeNote(); });
 $('addPaste').onclick = ()=>{
+  const rot0 = hasRole('work') && S.rotations[0];
+  if(rot0){ const lines = $('paste').value.split('\n'), offLines = lines.filter(l => !TIME_RE.test(l) && (EXTRA_RE.test(l) || OFF_WORDS.some(([re]) => re.test(l))));
+    if(offLines.length){ $('paste').value = lines.filter(l => !offLines.includes(l)).join('\n'); var offMsg = applyTimeOff(rot0, offLines.join('\n')); } }
   const pw = $('pasteWhoL').hidden ? 'me' : $('pasteWho').value, who = pw === 'all' ? ['me', ...namedPeople().map(p => p.id)] : [pw];
   const {added, skipped} = parseLines($('paste').value, $('pasteType').value, who); save(); renderWeek(); renderEvents();
   let m = added.length ? `Added ${added.length} ${added.length===1?'thing':'things'}.` : 'Nothing new to add.';
   if(skipped.length) m += ` Couldn't read: “${skipped.slice(0,3).join('”, “')}”${skipped.length>3?'…':''} (lines need a day and a time).`;
+  if(typeof offMsg === 'string' && offMsg){ m = (added.length || skipped.length ? m + ' ' : '') + offMsg; renderAll(); }
   $('pasteMsg').textContent = m; if(added.length) $('paste').value = '';
 };
 $('addOne').onclick = ()=>{
