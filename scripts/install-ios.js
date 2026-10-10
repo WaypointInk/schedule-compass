@@ -15,6 +15,16 @@ x = x.replace(/customClass="CAPBridgeViewController" customModule="Capacitor"/, 
 if(!x.includes('customClass="MainViewController"')){ console.error('Could not point Main.storyboard at MainViewController'); process.exit(1); }
 fs.writeFileSync(sb, x);
 
+// Capacitor 8 builds the first screen in SceneDelegate.swift (the storyboard is ignored), so point that at
+// MainViewController too — otherwise the app's own iPhone plugins are never loaded
+const sd = path.join(app, 'SceneDelegate.swift');
+if(fs.existsSync(sd)){
+  let d = fs.readFileSync(sd, 'utf8');
+  d = d.replace(/rootViewController\s*=\s*CAPBridgeViewController\(\)/, 'rootViewController = MainViewController()');
+  if(/CAPBridgeViewController\(\)/.test(d) || !d.includes('MainViewController()')){ console.error('Could not point SceneDelegate at MainViewController'); process.exit(1); }
+  fs.writeFileSync(sd, d);
+}
+
 // 3) Info.plist: permission text (the calendar photo button can open the camera; "Save Image" for the day's wallpaper) + "no special encryption" answer
 const plist = path.join(app, 'Info.plist');
 let p = fs.readFileSync(plist, 'utf8');
